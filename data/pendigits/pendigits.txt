@@ -1,0 +1,10 @@
+n_entradas= 16
+n_clases= 10
+n_arquivos= 2
+fich1= pendigits_train_R.dat
+n_patrons1= 7494
+fich2= pendigits_test_R.dat
+n_patrons2= 3498
+n_patrons_entrena= 3747
+n_patrons_valida= 3747
+n_conxuntos= 1

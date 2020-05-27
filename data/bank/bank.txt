@@ -1,0 +1,8 @@
+n_entradas= 16
+n_clases= 2
+n_arquivos= 1
+fich1= bank_R.dat
+n_patrons1= 4521
+n_patrons_entrena= 2261
+n_patrons_valida= 2260
+n_conxuntos= 1

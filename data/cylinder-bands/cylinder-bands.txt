@@ -1,0 +1,8 @@
+n_entradas= 35
+n_clases= 2
+n_arquivos= 1
+fich1= cylinder-bands_R.dat
+n_patrons1= 512
+n_patrons_entrena= 256
+n_patrons_valida= 256
+n_conxuntos= 1

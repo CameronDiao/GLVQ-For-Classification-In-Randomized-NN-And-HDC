@@ -1,0 +1,8 @@
+n_entradas= 29
+n_clases= 2
+n_arquivos= 1
+fich1= trains_R.dat
+n_patrons1= 10
+n_patrons_entrena= 5
+n_patrons_valida= 5
+n_conxuntos= 1

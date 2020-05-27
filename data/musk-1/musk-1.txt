@@ -1,0 +1,8 @@
+n_entradas= 166
+n_clases= 2
+n_arquivos= 1
+fich1= musk-1_R.dat
+n_patrons1= 476
+n_patrons_entrena= 238
+n_patrons_valida= 238
+n_conxuntos= 1

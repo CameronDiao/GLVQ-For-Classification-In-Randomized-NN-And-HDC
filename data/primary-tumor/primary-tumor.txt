@@ -1,0 +1,8 @@
+n_entradas= 17
+n_clases= 15
+n_arquivos= 1
+fich1= primary-tumor_R.dat
+n_patrons1= 330
+n_patrons_entrena= 165
+n_patrons_valida= 165
+n_conxuntos= 1

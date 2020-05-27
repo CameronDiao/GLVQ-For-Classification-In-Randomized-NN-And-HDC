@@ -1,0 +1,8 @@
+n_entradas= 64
+n_clases= 100
+n_arquivos= 1
+fich1= plant-texture_R.dat
+n_patrons1= 1599
+n_patrons_entrena= 800
+n_patrons_valida= 799
+n_conxuntos= 1

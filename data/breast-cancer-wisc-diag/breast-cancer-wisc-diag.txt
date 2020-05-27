@@ -1,0 +1,8 @@
+n_entradas= 30
+n_clases= 2
+n_arquivos= 1
+fich1= breast-cancer-wisc-diag_R.dat
+n_patrons1= 569
+n_patrons_entrena= 285
+n_patrons_valida= 284
+n_conxuntos= 1

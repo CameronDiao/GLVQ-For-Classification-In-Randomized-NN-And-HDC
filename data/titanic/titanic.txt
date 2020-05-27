@@ -1,0 +1,8 @@
+n_entradas= 3
+n_clases= 2
+n_arquivos= 1
+fich1= titanic_R.dat
+n_patrons1= 2201
+n_patrons_entrena= 1101
+n_patrons_valida= 1100
+n_conxuntos= 1

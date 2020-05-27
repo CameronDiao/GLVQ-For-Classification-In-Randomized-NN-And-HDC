@@ -1,0 +1,8 @@
+n_entradas= 18
+n_clases= 4
+n_arquivos= 1
+fich1= lymphography_R.dat
+n_patrons1= 148
+n_patrons_entrena= 74
+n_patrons_valida= 74
+n_conxuntos= 1

@@ -74,8 +74,4 @@ ehthumbs.db
 
 Thumbs.db
 
-# Directories #
-
-######################
-
-data/
+__pycache__/

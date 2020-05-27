@@ -1,0 +1,10 @@
+n_entradas= 18
+n_clases= 7
+n_arquivos= 2
+fich1= image-segmentation_train_R.dat
+n_patrons1= 210
+fich2= image-segmentation_test_R.dat
+n_patrons2= 2100
+n_patrons_entrena= 105
+n_patrons_valida= 105
+n_conxuntos= 1

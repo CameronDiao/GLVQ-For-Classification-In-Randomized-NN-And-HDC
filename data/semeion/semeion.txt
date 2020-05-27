@@ -1,0 +1,8 @@
+n_entradas= 256
+n_clases= 10
+n_arquivos= 1
+fich1= semeion_R.dat
+n_patrons1= 1593
+n_patrons_entrena= 797
+n_patrons_valida= 796
+n_conxuntos= 1

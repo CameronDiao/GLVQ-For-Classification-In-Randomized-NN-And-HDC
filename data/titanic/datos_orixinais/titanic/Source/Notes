@@ -1,0 +1,57 @@
+TITANIC DATASET
+
+Converted for use in DELVE by Radford Neal, June 1996.
+Originally compiled by Robert Dawson, 1995.
+
+
+The titanic dataset gives the values of four categorical attributes
+for each of the 2201 people on board the Titanic when it struck an
+iceberg and sank.  The attributes are social class (first class,
+second class, third class, crewmember), age (adult or child), sex, and
+whether or not the person survived.
+
+The question of interest for this natural dataset is how survival
+relates to the other attributes.  There is obviously no practical
+need to predict survival, so the real interest is in interpretation,
+but success at prediction would appear to be closely related to 
+the discovery of interesting features of the relationship.  Note
+that there are only sixteen possible combinations of input attributes
+for this prediction task, so the interesting behaviour will be that
+with small training sets.
+
+
+Source from which the data was obtained.
+
+The original source files are titanic.doc and titanic.dat, which were
+obtained from the data archive of the on-line Journal of Statistics
+Education, whose home page on the Web is at URL
+
+     http://www2.ncsu.edu/ncsu/pams/stat/info/jse/homepage.html
+
+Carriage returns at the end of the lines were deleted, as was a line
+containing a period at the end of each file.  Other than this, the
+titanic.doc and titanic.dat files are as obtained from this source.
+
+The dataset was compiled by Robert J. MacG. Dawson, and discussed by
+him in the on-line article 'The "Unusual Episode" Data Revisited',
+Journal of Statistics Education, vol. 3, no. 3 (1995), available via
+the URL above.
+
+
+Notes on aspects of the data.
+
+As discussed in the article, the dataset was reconstructed from
+sources that were not completely clear, so there are undoubtably some
+errors.
+
+The cases in titanic.dat are clearly in a non-informative order,
+grouped by identical attribute patterns.  This has been retained for
+the DELVE dataset file.  
+
+The representation of attributes has been changed to be more mnemonic.
+
+Prior information regarding the significance of social class is
+somewhat debatable.  In the standard prior, I have considered status
+to be an ordinal variable in which crewmembers come after third class
+passengers.  Perhaps crewmembers should be considered to be outside
+this class ordering altogether, but that is not convenient.

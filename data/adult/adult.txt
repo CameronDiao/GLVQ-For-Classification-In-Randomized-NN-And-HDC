@@ -1,0 +1,10 @@
+n_entradas= 14
+n_clases= 2
+n_arquivos= 2
+fich1= adult_train_R.dat
+n_patrons1= 32561
+fich2= adult_test_R.dat
+n_patrons2= 16281
+n_patrons_entrena= 16281
+n_patrons_valida= 16280
+n_conxuntos= 1

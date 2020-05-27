@@ -1,0 +1,8 @@
+n_entradas= 6
+n_clases= 2
+n_arquivos= 1
+fich1= vertebral-column-2clases_R.dat
+n_patrons1= 310
+n_patrons_entrena= 155
+n_patrons_valida= 155
+n_conxuntos= 1

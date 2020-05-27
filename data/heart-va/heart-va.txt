@@ -1,0 +1,8 @@
+n_entradas= 12
+n_clases= 5
+n_arquivos= 1
+fich1= heart-va_R.dat
+n_patrons1= 200
+n_patrons_entrena= 100
+n_patrons_valida= 100
+n_conxuntos= 1

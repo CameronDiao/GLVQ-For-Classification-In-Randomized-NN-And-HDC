@@ -1,0 +1,8 @@
+n_entradas= 3
+n_clases= 2
+n_arquivos= 1
+fich1= haberman-survival_R.dat
+n_patrons1= 306
+n_patrons_entrena= 153
+n_patrons_valida= 153
+n_conxuntos= 1

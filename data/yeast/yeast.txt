@@ -1,0 +1,8 @@
+n_entradas= 8
+n_clases= 10
+n_arquivos= 1
+fich1= yeast_R.dat
+n_patrons1= 1484
+n_patrons_entrena= 742
+n_patrons_valida= 742
+n_conxuntos= 1

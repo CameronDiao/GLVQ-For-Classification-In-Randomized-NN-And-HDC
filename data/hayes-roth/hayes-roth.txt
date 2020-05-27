@@ -1,0 +1,10 @@
+n_entradas= 3
+n_clases= 3
+n_arquivos= 2
+fich1= hayes-roth_train_R.dat
+n_patrons1= 132
+fich2= hayes-roth_test_R.dat
+n_patrons2= 28
+n_patrons_entrena= 66
+n_patrons_valida= 66
+n_conxuntos= 1

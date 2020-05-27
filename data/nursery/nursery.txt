@@ -1,0 +1,8 @@
+n_entradas= 8
+n_clases= 5
+n_arquivos= 1
+fich1= nursery_R.dat
+n_patrons1= 12960
+n_patrons_entrena= 6480
+n_patrons_valida= 6480
+n_conxuntos= 1

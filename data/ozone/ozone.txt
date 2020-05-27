@@ -1,0 +1,8 @@
+n_entradas= 72
+n_clases= 2
+n_arquivos= 1
+fich1= ozone_R.dat
+n_patrons1= 2536
+n_patrons_entrena= 1268
+n_patrons_valida= 1268
+n_conxuntos= 1

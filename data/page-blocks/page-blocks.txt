@@ -1,0 +1,8 @@
+n_entradas= 10
+n_clases= 5
+n_arquivos= 1
+fich1= page-blocks_R.dat
+n_patrons1= 5473
+n_patrons_entrena= 2737
+n_patrons_valida= 2736
+n_conxuntos= 1

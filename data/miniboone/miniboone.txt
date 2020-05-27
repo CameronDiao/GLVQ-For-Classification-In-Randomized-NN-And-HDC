@@ -1,0 +1,8 @@
+n_entradas= 50
+n_clases= 2
+n_arquivos= 1
+fich1= miniboone_R.dat
+n_patrons1= 130064
+n_patrons_entrena= 65032
+n_patrons_valida= 65032
+n_conxuntos= 1

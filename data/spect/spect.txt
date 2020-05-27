@@ -1,0 +1,10 @@
+n_entradas= 22
+n_clases= 2
+n_arquivos= 2
+fich1= spect_train_R.dat
+n_patrons1= 79
+fich2= spect_test_R.dat
+n_patrons2= 186
+n_patrons_entrena= 40
+n_patrons_valida= 39
+n_conxuntos= 1

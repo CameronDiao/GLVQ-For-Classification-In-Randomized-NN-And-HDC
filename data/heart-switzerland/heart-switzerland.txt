@@ -1,0 +1,8 @@
+n_entradas= 12
+n_clases= 5
+n_arquivos= 1
+fich1= heart-switzerland_R.dat
+n_patrons1= 123
+n_patrons_entrena= 62
+n_patrons_valida= 61
+n_conxuntos= 1

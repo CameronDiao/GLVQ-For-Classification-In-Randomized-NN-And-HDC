@@ -1,0 +1,8 @@
+n_entradas= 9
+n_clases= 2
+n_arquivos= 1
+fich1= breast-cancer_R.dat
+n_patrons1= 286
+n_patrons_entrena= 143
+n_patrons_valida= 143
+n_conxuntos= 1

@@ -1,0 +1,8 @@
+n_entradas= 9
+n_clases= 2
+n_arquivos= 1
+fich1= fertility_R.dat
+n_patrons1= 100
+n_patrons_entrena= 50
+n_patrons_valida= 50
+n_conxuntos= 1

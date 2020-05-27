@@ -1,0 +1,39 @@
+1 discreta 10 -- GB GK GS TN ZA ZF ZH ZM ZS
+2 discreta 3 C H G
+3 discreta 9 - R A U K M S W V
+4 continua
+5 continua
+6 discreta 2 - T
+7 discreta 4 - S A X
+8 discreta 6 - 1 2 3 4 5
+9 continua
+10 discreta 2 - N
+11 discreta 3 P M -
+12 discreta 5 - D E F G
+13 discreta 6 - 1 2 3 4 5
+14 discreta 2 Y -
+15 discreta 2 Y -
+16 discreta 2 Y -
+17 discreta 3 B M -
+18 discreta 2 Y -
+19 discreta 2 Y -
+20 discreta 2 C -
+21 discreta 2 P -
+22 discreta 2 Y -
+23 discreta 2 Y -
+24 discreta 2 Y -
+25 discreta 2 Y -
+26 discreta 2 Y -
+27 discreta 5 B R V C -
+28 discreta 2 Y -
+29 discreta 2 Y -
+30 discreta 2 Y -
+31 discreta 2 Y -
+32 discreta 2 COIL SHEET
+33 continua
+34 continua
+35 continua
+36 discreta 3 - Y N
+37 discreta 4 0000 0500 0600 0760
+38 discreta 4 - 1 2 3
+individual 1 2 3 4 5 U

@@ -1,0 +1,8 @@
+n_entradas= 6
+n_clases= 2
+n_arquivos= 1
+fich1= acute-inflammation_R.dat
+n_patrons1= 120
+n_patrons_entrena= 60
+n_patrons_valida= 60
+n_conxuntos= 1

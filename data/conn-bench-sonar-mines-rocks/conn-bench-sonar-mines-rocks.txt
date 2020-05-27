@@ -1,0 +1,8 @@
+n_entradas= 60
+n_clases= 2
+n_arquivos= 1
+fich1= conn-bench-sonar-mines-rocks_R.dat
+n_patrons1= 208
+n_patrons_entrena= 104
+n_patrons_valida= 104
+n_conxuntos= 1

@@ -1,0 +1,10 @@
+n_entradas= 36
+n_clases= 6
+n_arquivos= 2
+fich1= statlog-landsat_train_R.dat
+n_patrons1= 4435
+fich2= statlog-landsat_test_R.dat
+n_patrons2= 2000
+n_patrons_entrena= 2218
+n_patrons_valida= 2217
+n_conxuntos= 1

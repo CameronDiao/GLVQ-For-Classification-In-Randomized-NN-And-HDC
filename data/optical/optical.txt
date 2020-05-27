@@ -1,0 +1,10 @@
+n_entradas= 62
+n_clases= 10
+n_arquivos= 2
+fich1= optical_train_R.dat
+n_patrons1= 3823
+fich2= optical_test_R.dat
+n_patrons2= 1797
+n_patrons_entrena= 1912
+n_patrons_valida= 1911
+n_conxuntos= 1
