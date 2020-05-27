@@ -9,11 +9,11 @@ def activations(x, w_in, b, g):
 
 def activation_matrix(dataset, w_in, b, g):
     h_matrix = []
-    for feature in dataset.index:
-        x = dataset.loc[feature]
+    for sample in dataset.index:
+        x = dataset.loc[sample]
         x = x.to_frame()
         h = activations(x, w_in, b, g)
-        h = pd.DataFrame(data=np.transpose(h), index=[feature])
+        h = pd.DataFrame(data=np.transpose(h), index=[sample])
         h_matrix.append(h)
     h_matrix = pd.concat(h_matrix, axis=0)
     return h_matrix
