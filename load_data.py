@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 import os
 import re
@@ -7,36 +6,41 @@ def read_set(file_path):
     """
     Reads a tab-separated text file into a pandas DataFrame
     :param file_path: the file path of the tab-separated file
-    :return: reader: a pandas DataFrame
+    :return: reader: a DataFrame object containing the contents of the file
     """
     with open(file_path, "r") as f:
         reader = pd.read_csv(f, delimiter = "\t")
     return reader
 
-def read_indices(file_path):
+def read_indices(file_path, dataset):
     """
     Assumes k-fold cross validation was performed on a given dataset
-    Returns a dictionary mapping the ith fold to the testing and training indices of that dataset
-    :param file_path: the file name of the tab-separated file containing the dataset
-    :return: fold_indices: a dictionary mapping the ith fold to a dictionary containing the testing indices and
-    the training indices
+    Returns a dictionary mapping the ith fold to its corresponding testing and training datasets
+    :param file_path: the file name of the tab-separated file containing the k-fold indices
+    :param dataset: the entire dataset
+    :return: fold_sets: a dictionary mapping the ith fold to a dictionary containing the testing set and
+    the training set
     """
-    fold_indices = {}
+    fold_sets = {}
     with open(file_path, "r") as f:
         reader = f.readlines()
     for idx in range(0, len(reader), 2):
-        idx_list = {"Train": reader[idx].strip().split(" "), "Test": reader[idx + 1].strip().split(" ")}
-        fold_indices[(idx / 2) + 1] = idx_list
-    return fold_indices
+        train_indices = reader[idx].strip().split(" ")
+        test_indices = reader[idx + 1].strip().split(" ")
+        train_set = dataset[dataset.index.isin(train_indices)]
+        test_set = dataset[dataset.index.isin(test_indices)]
+        idx_list = {"Train": train_set, "Test": test_set}
+        fold_sets[(idx / 2) + 1] = idx_list
+    return fold_sets
 
 def scan_folder(parent, parent_name, test_train, k_fold):
     """
     Separates the files of a given folder into testing/training datasets and cross validation datasets
     :param parent: the file path of the given folder/file
     :param parent_name: the name of the folder/file
-    :param test_train: a dictionary mapping the label of each dataset parent_name to the dataset itself
-    :param k_fold: a dictionary mapping the label of each dataset parent_name to the dataset itself,
-    with the dataset's cross validation indices
+    :param test_train: a dictionary mapping the label of each study parent_name to its dataset
+    :param k_fold: a dictionary mapping the label of each study parent_name to its dataset,
+    indexed by the k folds used to perform cross validation on the dataset
     :return: None
     """
     files_in = [item for item in os.listdir(parent) if re.match(".+\..+", item)]
@@ -53,8 +57,8 @@ def scan_folder(parent, parent_name, test_train, k_fold):
             data_set = "".join((parent, "/", test_type))
             data_reader = read_set(data_set)
             idx_set = "".join((parent, "/conxuntos_kfold.dat"))
-            idx_reader = read_indices(idx_set)
-            k_fold[parent_name] = {"Data": data_reader, "Indices": idx_reader}
+            idx_reader = read_indices(idx_set, data_reader)
+            k_fold[parent_name] = idx_reader
 
     else:
         for file_name in os.listdir(parent):
