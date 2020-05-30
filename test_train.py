@@ -16,10 +16,10 @@ def test_train_model(train_set, test_set, lmb, n):
     :return: the class type prediction accuracy of the constructed network
     """
     # Preprocess train_set
-    train_set = init.preprocess(train_set)
+    #train_set = init.preprocess(train_set)
 
     # Preprocess test_set
-    test_set = init.preprocess(test_set)
+    #test_set = init.preprocess(test_set)
 
     # Set parameters
     k = len(train_set.columns) - 1

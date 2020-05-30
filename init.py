@@ -79,7 +79,7 @@ def readout_matrix(h_matrix, y_matrix, lmb, n):
     :return: w_out: a DataFrame object of dimension N x L containing weights of the readout connections
     between the hidden and output layers
     """
-    id_matrix = np.identity(n)
+    id_matrix = np.diag(np.var(h_matrix.values, axis=0))
     inner = (h_matrix.transpose().dot(h_matrix)).add((id_matrix * lmb))
     inverse_inner = pd.DataFrame(np.linalg.pinv(inner.values), inner.columns, inner.index)
     w_out = inverse_inner.dot(h_matrix.transpose()).dot(y_matrix)

@@ -1,6 +1,7 @@
 import pandas as pd
 import os
 import re
+import init
 
 def read_set(file_path):
     """
@@ -50,12 +51,18 @@ def scan_folder(parent, parent_name, test_train, k_fold):
             train_set = "".join((parent, "/", parent_name + "_train_R.dat"))
             test_set = "".join((parent, "/", parent_name + "_test_R.dat"))
             train_reader = read_set(train_set)
+            train_reader = init.preprocess(train_reader)
+
             test_reader = read_set(test_set)
+            test_reader = init.preprocess(test_reader)
+
             data_list = {"Train": train_reader, "Test": test_reader}
             test_train[parent_name] = data_list
         else:
             data_set = "".join((parent, "/", test_type))
             data_reader = read_set(data_set)
+            data_reader = init.preprocess(data_reader)
+
             idx_set = "".join((parent, "/conxuntos_kfold.dat"))
             idx_reader = read_indices(idx_set, data_reader)
             k_fold[parent_name] = idx_reader
