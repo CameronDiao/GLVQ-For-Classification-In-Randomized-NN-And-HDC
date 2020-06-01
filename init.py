@@ -1,5 +1,8 @@
 import numpy as np
 import pandas as pd
+import sys
+sys.path.append("/opt/anaconda3/lib/python3.7/site-packages")
+import sklearn_lvq
 
 def preprocess(dataset):
     """
@@ -83,4 +86,9 @@ def readout_matrix(h_matrix, y_matrix, lmb, n):
     inner = (h_matrix.transpose().dot(h_matrix)).add((id_matrix * lmb))
     inverse_inner = pd.DataFrame(np.linalg.pinv(inner.values), inner.columns, inner.index)
     w_out = inverse_inner.dot(h_matrix.transpose()).dot(y_matrix)
+    return w_out
+
+def readout_matrix_glvq(h_matrix, y_matrix):
+    w_out = sklearn_lvq.GlvqModel()
+    w_out.fit(h_matrix, y_matrix)
     return w_out

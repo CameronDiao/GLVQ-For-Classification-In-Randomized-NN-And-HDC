@@ -6,7 +6,7 @@ import pred
 
 def test_train_model(train_set, test_set, lmb, n):
     """
-    Constructs a conventional RVFL network for predicting the class types of testing samples
+    Constructs a neural network for predicting the class types of testing samples
     :param train_set: a pandas DataFrame containing training samples with their respective feature values
     and class types
     :param test_set: a pandas DataFrame containing testing samples with their respective feature values
@@ -31,25 +31,28 @@ def test_train_model(train_set, test_set, lmb, n):
     train_features = train_set.drop(["clase"], axis=1)
     h_matrix = init.activation_matrix(train_features, w_in, b, g)
     # Store ground truth classifications of training examples using one-hot encodings
-    y_matrix = pd.get_dummies(train_set["clase"])
-    # Compute the readout matrix W_out
-    w_out = init.readout_matrix(h_matrix, y_matrix, lmb, n)
+    #y_matrix = pd.get_dummies(train_set["clase"])
+    y_matrix = train_set["clase"]
+    # Fit a GLVQ classifier model to h_matrix, y_matrix
+    w_out = init.readout_matrix_glvq(h_matrix, y_matrix)
 
     # Compute the activation matrix of the hidden layer
     test_features = test_set.drop(["clase"], axis = 1)
     h_matrix = init.activation_matrix(test_features, w_in, b, g)
     # Compute the dot product between h_matrix and w_out
-    test_pred = h_matrix.dot(w_out)
-
-    # Generate test_set predictions
-    pred_series = pred.generate_pred(test_pred)
+    #test_pred = h_matrix.dot(w_out)
+    # Predict class types using the GLVQ classifier model w_out
+    #test_pred = w_out.predict(h_matrix)
 
     # test accuracy
-    correct = 0
-    for sample in test_set.index:
-        if pred_series[sample] == test_set.loc[sample]["clase"]:
-            correct += 1
-    return correct/len(test_set.index)
+    #correct = 0
+    #for sample in train_set.index:
+    #    if test_pred[sample - 1] == train_set.loc[sample]["clase"]:
+    #        correct += 1
+    #return correct/len(train_set.index)
+
+    # Score prediction accuracy of GLVQ classifier model w_out
+    return w_out.score(h_matrix, test_set["clase"])
 
 def model_accuracy(test_train, lmb, n):
     """

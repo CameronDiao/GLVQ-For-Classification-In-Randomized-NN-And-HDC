@@ -2,24 +2,26 @@ import sys
 import load_data as ld
 import test_train as tt
 import k_fold as kf
-#import scipy.io as sc
+import scipy.io as sc
 
 # Instantiate empty test_train and k_fold dictionaries
 test_train = {}
 k_fold = {}
 # Load test_train and k_fold with their respective datasets
 ld.scan_folder("/Users/camerondiao/Documents/HDResearch/DataManip/data", "data", test_train, k_fold)
-# ld.scan_folder("/Users/denkle/Dropbox/Google_Drive/WORK/MATLAB/2020_intRVFL_centroids_vs_readout/many_datasets/data",
-#               "data", test_train, k_fold)
+
 
 # Set parameters
-lmb = 0.1
-n = 100
+#lmb = 0.1
+#n = 100
+
+
 
 # load optimal hyperparameters
-simul = 5  # number of runs for random parameter initialization
-# elm_opt_param = sc.loadmat('/Users/denkle/Dropbox/Google_Drive/WORK/MATLAB/2017_ELM/elm_opt_param.mat')  # initial feature set
-# elm_opt_param = (elm_opt_param['elm_opt_param'])
+simul=5 # number of runs for random parameter initialization
+elm_opt_param=sc.loadmat('/Users/camerondiao/Documents/HDResearch/DataManip/elm_opt_param.mat') #initial feature set
+elm_opt_param=(elm_opt_param['elm_opt_param'])
+
 
 # Gather accuracies for each dataset
 tt_data = list(test_train.keys())
@@ -31,10 +33,10 @@ accuracy_all = [[] for i in range(len(total_data))]  # will store accuracies for
 
 for sim in range(simul):  # for simul initializations
     for i in range(len(total_data)):
-        # n = int(elm_opt_param[i, 0])
-        # lmb = elm_opt_param[i, 1]
+        n = int(elm_opt_param[i, 0])
+        lmb = elm_opt_param[i, 1]
 
-        # print(sim, i)
+        print(sim, i)
         key=total_data[i]
         if key in tt_data:  # if dataset is in tt_data
             # Recreate dictionary structure with only the current dataset
@@ -65,7 +67,7 @@ for sim in range(simul):  # for simul initializations
             temp[key][key2]["Train"] = k_fold.get(key)[key2]["Train"]
             temp[key][key2]["Test"] = k_fold.get(key)[key2]["Test"]
 
-            # Recteate dictionary structure with only the current dataset
+            # Recreate dictionary structure with only the current dataset
             # accuracy_all[i]=kf.model_accuracy(temp, lmb, n)[0]
             accuracy_all[i].append(kf.model_accuracy(temp, lmb, n)[0])
 
