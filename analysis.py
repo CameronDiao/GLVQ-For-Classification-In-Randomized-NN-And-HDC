@@ -1,8 +1,5 @@
-import sys
-import random
 import load_data as ld
-import test_train as tt
-import k_fold as kf
+import model_accuracy as ma
 import scipy.io as sc
 
 # Instantiate empty test_train and k_fold dictionaries
@@ -13,8 +10,8 @@ ld.scan_folder("/Users/camerondiao/Documents/HDResearch/DataManip/data", "data",
 
 # load optimal hyperparameters
 simul=5 # number of runs for random parameter initialization
-elm_opt_param=sc.loadmat('/Users/camerondiao/Documents/HDResearch/DataManip/elm_opt_param.mat') #initial feature set
-elm_opt_param=(elm_opt_param['elm_opt_param'])
+elm_opt_param=sc.loadmat('/Users/camerondiao/Documents/HDResearch/DataManip/i_elm_opt_param.mat') #initial feature set
+elm_opt_param=(elm_opt_param['i_elm_opt_param'])
 
 # Gather accuracies for each dataset
 tt_data = list(test_train.keys())
@@ -27,7 +24,7 @@ for sim in range(simul):  # for simul initializations
     for i in range(len(total_data)):
         n = int(elm_opt_param[i, 0])
         lmb = elm_opt_param[i, 1]
-        kappa = random.choice([1, 3, 5, 7])
+        kappa = int(elm_opt_param[i, 2])
 
         print(sim, i)
         key=total_data[i]
@@ -39,7 +36,7 @@ for sim in range(simul):  # for simul initializations
             temp[key]["Test"] = test_train.get(key)["Test"]
 
             # accuracy_all[i]=tt.model_accuracy(temp, lmb, n)[0]
-            accuracy_all[i].append(tt.model_accuracy(temp, lmb, n, kappa)[0])
+            accuracy_all[i].append(ma.tt_model_accuracy(temp, lmb, n, kappa))
         else:  # if dataset is in kf_data
             temp = {}
             temp[key] = {}
@@ -62,7 +59,7 @@ for sim in range(simul):  # for simul initializations
 
             # Recreate dictionary structure with only the current dataset
             # accuracy_all[i]=kf.model_accuracy(temp, lmb, n)[0]
-            accuracy_all[i].append(kf.model_accuracy(temp, lmb, n, kappa)[0])
+            accuracy_all[i].append(ma.kf_model_accuracy(temp, lmb, n, kappa))
 
 # Accuracy mean
 accuracy_all_s = [sum(elm) / simul for elm in accuracy_all]  # mean values for each dataset accross simulations
