@@ -18,7 +18,7 @@ def kf_model_accuracy(test_train, lmb, n, kappa):
     sum_acc = 0
     for fold in fold_sets:
         # Calculate model accuracy for individual folds
-        fold_acc = tt.encoding_model(fold_sets[fold]["Train"], fold_sets[fold]["Test"], lmb, n, kappa)
+        fold_acc = tt.lvq_model(fold_sets[fold]["Train"], fold_sets[fold]["Test"], n, kappa)
         sum_acc += fold_acc
     # Return average model accuracy across all folds
     return sum_acc / num_folds
@@ -37,5 +37,5 @@ def tt_model_accuracy(test_train, lmb, n, kappa):
     train_set = test_train[name]["Train"]
     test_set = test_train[name]["Test"]
 
-    acc = tt.encoding_model(train_set, test_set, lmb, n, kappa)
+    acc = tt.lvq_model(train_set, test_set, n, kappa)
     return acc

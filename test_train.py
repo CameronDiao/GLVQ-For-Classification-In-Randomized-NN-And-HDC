@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import init
 
-def test_train_model(train_set, test_set, lmb, n): # not in use
+def test_train_model(train_set, test_set, lmb, n):
     """
     Constructs an RVFL network for predicting the class types of testing data
     :param train_set: a pandas DataFrame containing training samples with their respective feature values
@@ -32,7 +32,7 @@ def test_train_model(train_set, test_set, lmb, n): # not in use
     y_matrix = pd.get_dummies(train_set["clase"])
     y_matrix = y_matrix.values.astype(dtype="float64")
     # Compute readout matrix from h_matrix, y_matrix
-    w_out = init.readout_matrix(h_matrix, y_matrix, lmb, n)
+    w_out = init.readout_matrix(h_matrix, y_matrix, lmb)
 
     # Compute the activation matrix of the hidden layer
     test_features = test_set.drop(["clase"], axis=1)
@@ -41,7 +41,7 @@ def test_train_model(train_set, test_set, lmb, n): # not in use
     # Compute the dot product between h_matrix and w_out
     test_pred = h_matrix @ w_out
     # Generate test_set predictions
-    pred_series = init.generate_pred(test_pred)
+    pred_series = np.argmax(test_pred, axis=1)
 
     # test accuracy
     test_class = test_set["clase"].values
@@ -49,7 +49,7 @@ def test_train_model(train_set, test_set, lmb, n): # not in use
     return correct / len(test_class)
 
 
-def lvq_model(train_set, test_set, n): # not in use
+def lvq_model(train_set, test_set, n, kappa):
     """
     Constructs a neural network employing LVQ classification for predicting the class types of testing samples
     :param train_set: a pandas DataFrame containing training samples with their respective feature values
@@ -62,28 +62,31 @@ def lvq_model(train_set, test_set, n): # not in use
     # Set parameters
     k = len(train_set.columns) - 1
     w_in = np.random.uniform(-1, 1, size=(n, k)).astype(dtype="float64")
-    b = np.random.uniform(-0.1, 0.1).astype(dtype="float64")
 
-    # Compute the activation matrix of the hidden layer
+    # Compute density-based representation layer
     train_features = train_set.drop(["clase"], axis=1)
     train_features = train_features.values
-    h_matrix = init.activation_matrix(train_features, w_in, b)
+    train_encode_set = init.density_encoding(train_features, n)
+    # Compute the activation matrix of the hidden layer
+    h_matrix = init.enc_activation_matrix(train_encode_set, w_in, kappa)
     # Store ground truth classifications of training examples
     y_matrix = train_set["clase"].values
-    # Fit an LVQ classifier model to h_matrix, y_matrix
+    # Compute readout matrix from h_matrix, y_matrix
     w_out = init.readout_matrix_lvq(h_matrix, y_matrix)
 
-    # Compute the activation matrix of the hidden layer
+    # Apply density-based encoding to feature values of testing data
     test_features = test_set.drop(["clase"], axis=1)
     test_features = test_features.values
-    h_matrix = init.activation_matrix(test_features, w_in, b)
+    test_encode_set = init.density_encoding(test_features, n)
+    # Compute the activation matrix of the hidden layer
+    h_matrix = init.enc_activation_matrix(test_encode_set, w_in, kappa)
     # Predict class types using the LVQ classifier model w_out
     #test_pred = w_out.predict(h_matrix)
 
     # Score prediction accuracy of LVQ classifier model w_out
     return w_out.score(h_matrix, test_set["clase"].values)
 
-def direct_lvq_model(train_set, test_set): # not in use
+def direct_lvq_model(train_set, test_set):
     """
         Constructs an LVQ classifier model for predicting the class types of testing samples directly from
         feature values
@@ -108,7 +111,7 @@ def direct_lvq_model(train_set, test_set): # not in use
     # Score prediction accuracy of LVQ classifier model w_out
     return w_out.score(test_features, test_set["clase"].values)
 
-def encoding_model(train_set, test_set, lmb, n, kappa): # in use
+def encoding_model(train_set, test_set, lmb, n, kappa):
     """
     Constructs an RVFL network for predicting the class types of testing data
     Operates on density-based encodings of feature values
@@ -133,9 +136,8 @@ def encoding_model(train_set, test_set, lmb, n, kappa): # in use
     h_matrix = init.enc_activation_matrix(train_encode_set, w_in, kappa)
     # Store ground truth classifications of training examples using one-hot encodings
     y_matrix = pd.get_dummies(train_set["clase"])
-    y_matrix = y_matrix.values.astype(dtype="float64")
     # Compute readout matrix from h_matrix, y_matrix
-    w_out = init.readout_matrix(h_matrix, y_matrix, lmb, n)
+    w_out = init.readout_matrix(h_matrix, y_matrix, lmb)
 
     # Apply density-based encoding to feature values of testing data
     test_features = test_set.drop(["clase"], axis = 1)
@@ -144,9 +146,9 @@ def encoding_model(train_set, test_set, lmb, n, kappa): # in use
     # Compute the activation matrix of the hidden layer
     h_matrix = init.enc_activation_matrix(test_encode_set, w_in, kappa)
     # Compute the dot product between h_matrix and w_out
-    test_pred = h_matrix @ w_out
+    test_pred = h_matrix.astype(dtype=np.float32) @ w_out
     # Generate test_set predictions
-    pred_series = init.generate_pred(test_pred)
+    pred_series = np.argmax(test_pred, axis=1)
 
     # test accuracy
     test_class = test_set["clase"].values

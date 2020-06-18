@@ -1,7 +1,9 @@
 import numpy as np
-from numba import jit, vectorize, float64
+import scipy as sc
+from numba import njit, vectorize, float64, prange
 import sklearn_lvq
 import math
+import glvq
 
 def preprocess(dataset):
     """
@@ -19,12 +21,16 @@ def preprocess(dataset):
     # Normalize features in dataset to the range [0, 1]
     dataset = (dataset - dataset.min()) / (dataset.max() - dataset.min())
     # Fill missing values with 0s
-    dataset = dataset.fillna(1)
+    dataset = dataset.fillna(0)
     # Add "clase" feature back to dataset
     dataset["clase"] = dataset_class.values
     return dataset
 
-@jit(nopython=True)
+@vectorize([float64(float64, float64)])
+def quantize(elem, n):
+    return int(round(elem * n))
+
+@njit(parallel=True)
 def density_encoding(dataset, n):
     """
     Applies density-based encoding to feature values of dataset
@@ -38,13 +44,10 @@ def density_encoding(dataset, n):
     In this instance, a Series object of size M containing numpy 2-D arrays of shape N x K
     """
     enc_ds = np.zeros((dataset.shape[0], n, dataset.shape[1]))
-    for row in range(dataset.shape[0]):
-        x = np.zeros(dataset.shape[1])
-        for i, elem in np.ndenumerate(dataset[row]):
-            v = int(round(elem * n))
-            x[i] = v
+    for row in prange(dataset.shape[0]):
+        x = quantize(dataset[row], np.float64(n))
         enc_matrix = np.ones((x.size, n))
-        for vec in range(enc_matrix.shape[0]):
+        for vec in prange(enc_matrix.shape[0]):
             enc_matrix[vec][0:int(x[vec])] = -1
         enc_ds[row] = enc_matrix.T
     return enc_ds
@@ -55,7 +58,7 @@ def density_encoding(dataset, n):
 def sigmoid(elem):
     return 1 / (1 + math.exp(-elem))
 
-@jit(nopython=True)
+@njit
 def activation_matrix(dataset, w_in, b):
     """
     Constructs the matrix H of hidden layer activation values of every data sample in dataset
@@ -81,7 +84,7 @@ def activation_matrix(dataset, w_in, b):
     h_matrix = sigmoid(h_matrix)
     return h_matrix
 
-@jit(nopython=True)
+@njit(parallel=True)
 def enc_activation_matrix(dataset, w_in, kappa):
     """
     Constructs the matrix H of hidden layer activation values from the density-based representation layer
@@ -96,10 +99,9 @@ def enc_activation_matrix(dataset, w_in, kappa):
     In this instance, a Series object of size M containing numpy 1-D arrays of size N
     """
     h_matrix = np.zeros((dataset.shape[0], dataset.shape[1]))
-    for row in range(dataset.shape[0]):
+    for row in prange(dataset.shape[0]):
         x = dataset[row]
-        h = np.multiply(x, w_in)
-        h = np.sum(h, axis=1)
+        h = np.sum(np.multiply(x, w_in), axis=1)
         for i, elem in np.ndenumerate(h):
             if elem >= kappa:
                 h[i] = kappa
@@ -110,8 +112,7 @@ def enc_activation_matrix(dataset, w_in, kappa):
     # h_matrix = dataset.apply(lambda row: enc_am_helper(np.stack(row), w_in, kappa))
     # return h_matrix
 
-@jit(nopython=True)
-def readout_matrix(h_matrix, y_matrix, lmb, n):
+def readout_matrix(h_matrix, y_matrix, lmb):
     """
     Construct matrix w_out of readout connections between the hidden and output layers of the RVFL network
     :param h_matrix: a data matrix of dimension M x N containing the hidden layer activation values
@@ -126,8 +127,11 @@ def readout_matrix(h_matrix, y_matrix, lmb, n):
     between the hidden and output layers
     In this instance, a numpy 2-D array of shape N x L
     """
-    id_matrix = np.eye(n)
-    w_out = np.linalg.lstsq(h_matrix.T @ h_matrix + id_matrix * lmb, h_matrix.T @ y_matrix)[0]
+    h_matrix = h_matrix.astype(dtype=np.float32)
+    y_matrix = y_matrix.astype(dtype=np.float32)
+    id_matrix = np.diag(np.var(h_matrix, axis=0))
+    #w_out = np.linalg.lstsq(h_matrix.T @ h_matrix + id_matrix * lmb, h_matrix.T @ y_matrix)[0]
+    w_out = sc.linalg.pinv(h_matrix.T @ h_matrix + id_matrix * lmb) @ h_matrix.T @ y_matrix
     return w_out
     #inner = np.add(x.T @ x, id_matrix * lmb)
     #w_out = np.linalg.pinv(inner) @ x.T @ y_matrix
@@ -144,15 +148,8 @@ def readout_matrix_lvq(h_matrix, y_matrix):
     :param y_matrix: a DataFrame object of dimension M x 1 containing sample classifications
     :return: w_out: an LVQ Model object
     """
-    w_out = sklearn_lvq.RslvqModel()
+    h_matrix = h_matrix.astype(dtype=np.float32)
+    y_matrix = y_matrix.astype(dtype=np.float32)
+    w_out = glvq.GlvqModel()
     w_out.fit(h_matrix, y_matrix)
     return w_out
-
-def generate_pred(product_matrix):
-    """
-    Generate class type predictions based on product_matrix of dot product similarities
-    :param product_matrix: a DataFrame object of dimension M x L containing the dot product similarities of
-    each data sample to each class type
-    :return: pred_series: a Series object containing the class predictions of each data sample
-    """
-    return np.argmax(product_matrix, axis=1)

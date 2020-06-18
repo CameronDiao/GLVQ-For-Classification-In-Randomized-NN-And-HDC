@@ -1,6 +1,7 @@
 import load_data as ld
 import model_accuracy as ma
 import scipy.io as sc
+import time
 
 # Instantiate empty test_train and k_fold dictionaries
 test_train = {}
@@ -19,6 +20,8 @@ kf_data = list(k_fold.keys())
 total_data = sorted(tt_data + kf_data)
 
 accuracy_all = [[] for i in range(len(total_data))]  # will store accuracies for individual datasets
+
+start_time = time.time()
 
 for sim in range(simul):  # for simul initializations
     for i in range(len(total_data)):
@@ -65,6 +68,8 @@ for sim in range(simul):  # for simul initializations
 accuracy_all_s = [sum(elm) / simul for elm in accuracy_all]  # mean values for each dataset accross simulations
 
 accuracy_all_mean = sum(accuracy_all_s) / len(accuracy_all_s)  # mean accuracy among all datasets
+
+print("--- %s seconds ---" % (time.time() - start_time))
 
 # Output results
 f = open("output.txt", "w")
