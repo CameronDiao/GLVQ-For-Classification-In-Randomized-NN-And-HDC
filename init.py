@@ -4,6 +4,9 @@ from numba import njit, vectorize, float64, prange
 import sklearn_lvq
 import math
 import glvq
+#import cProfile
+#import io
+#import pstats
 
 def preprocess(dataset):
     """
@@ -30,7 +33,7 @@ def preprocess(dataset):
 def quantize(elem, n):
     return int(round(elem * n))
 
-@njit(parallel=True)
+@njit
 def density_encoding(dataset, n):
     """
     Applies density-based encoding to feature values of dataset
@@ -84,7 +87,7 @@ def activation_matrix(dataset, w_in, b):
     h_matrix = sigmoid(h_matrix)
     return h_matrix
 
-@njit(parallel=True)
+@njit
 def enc_activation_matrix(dataset, w_in, kappa):
     """
     Constructs the matrix H of hidden layer activation values from the density-based representation layer
@@ -148,8 +151,16 @@ def readout_matrix_lvq(h_matrix, y_matrix):
     :param y_matrix: a DataFrame object of dimension M x 1 containing sample classifications
     :return: w_out: an LVQ Model object
     """
-    h_matrix = h_matrix.astype(dtype=np.float32)
-    y_matrix = y_matrix.astype(dtype=np.float32)
-    w_out = glvq.GlvqModel()
+    #h_matrix = h_matrix.astype(dtype=np.float32)
+    #y_matrix = y_matrix.astype(dtype=np.float32)
+    w_out = glvq.GlvqModel(prototypes_per_class=3, beta=13)
+    #pr = cProfile.Profile()
+    #pr.enable()
     w_out.fit(h_matrix, y_matrix)
+    #pr.disable()
+    #s = io.StringIO()
+    #sortby = pstats.SortKey.CUMULATIVE  # 'cumulative'
+    #ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+    #ps.print_stats()
+    #print(s.getvalue())
     return w_out

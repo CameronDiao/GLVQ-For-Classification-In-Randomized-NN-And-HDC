@@ -135,7 +135,7 @@ def encoding_model(train_set, test_set, lmb, n, kappa):
     # Compute the activation matrix of the hidden layer
     h_matrix = init.enc_activation_matrix(train_encode_set, w_in, kappa)
     # Store ground truth classifications of training examples using one-hot encodings
-    y_matrix = pd.get_dummies(train_set["clase"])
+    y_matrix = pd.get_dummies(train_set["clase"]).values
     # Compute readout matrix from h_matrix, y_matrix
     w_out = init.readout_matrix(h_matrix, y_matrix, lmb)
 
@@ -152,5 +152,5 @@ def encoding_model(train_set, test_set, lmb, n, kappa):
 
     # test accuracy
     test_class = test_set["clase"].values
-    correct = np.sum(pred_series == test_class)
+    correct = np.count_nonzero(pred_series == test_class)
     return correct / len(test_class)
