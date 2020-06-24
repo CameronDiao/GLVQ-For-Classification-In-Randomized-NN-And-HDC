@@ -24,73 +24,32 @@ from lvq import _LvqBaseModel
 DTYPE = np.float64
 ctypedef cnp.float64_t DTYPE_t
 
-@cython.boundscheck(False)
-@cython.wraparound(False)
-cdef _squared_euclidean(cnp.ndarray a, cnp.ndarray b):
-    assert a.dtype == DTYPE and b.dtype == DTYPE
-    cdef int ar = a.shape[0]
-    cdef int ac = a.shape[1]
-    cdef cnp.ndarray[DTYPE_t, ndim=2] d
-    #if b is None:
-    #    d = np.sum(a ** 2, 1)[np.newaxis].T + np.sum(a ** 2, 1) - 2 * a.dot(
-    #        a.T)
-    d = np.sum(a ** 2, 1)[np.newaxis].T + np.sum(b ** 2, 1) - 2 * a.dot(
-        b.T)
+def _squared_euclidean(a, b=None):
+    if b is None:
+        d = np.sum(a ** 2, 1)[np.newaxis].T + np.sum(a ** 2, 1) - 2 * a.dot(
+            a.T)
+    else:
+        d = np.sum(a ** 2, 1)[np.newaxis].T + np.sum(b ** 2, 1) - 2 * a.dot(
+            b.T)
     return np.maximum(d, 0)
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-cdef optgradhelper(cnp.ndarray variables, cnp.ndarray training_data, cnp.ndarray label_equals_prototype,
-                   cnp.ndarray c_w_, int beta):
-        assert variables.dtype == DTYPE and training_data.dtype == DTYPE
-        cdef int n_data = training_data.shape[0]
-        cdef int n_dim = training_data.shape[1]
-        cdef int nb_prototypes = c_w_.shape[0]
-        cdef cnp.ndarray[DTYPE_t, ndim=2] prototypes = variables.reshape(nb_prototypes, n_dim)
-        cdef cnp.ndarray[DTYPE_t, ndim=2] dist = _squared_euclidean(training_data, prototypes)
-        cdef cnp.ndarray[DTYPE_t, ndim=2] d_wrong = dist.copy()
-        cdef cnp.ndarray[DTYPE_t, ndim=1] distwrong
-        cdef cnp.ndarray pidxwrong
-        cdef cnp.ndarray[DTYPE_t, ndim=2] d_correct = dist.copy()
-        cdef cnp.ndarray[DTYPE_t, ndim=1] distcorrect
-        cdef cnp.ndarray pidxcorrect
-        cdef cnp.ndarray[DTYPE_t, ndim=1] distcorrectpluswrong
-        cdef cnp.ndarray[DTYPE_t, ndim=1] distcorrectminuswrong
-        cdef cnp.ndarray[DTYPE_t, ndim=1] mu
-        cdef cnp.ndarray[DTYPE_t, ndim=2] g = np.zeros((nb_prototypes, n_dim), dtype=DTYPE)
-        cdef cnp.ndarray idxc
-        cdef cnp.ndarray idxw
-        cdef cnp.ndarray[DTYPE_t, ndim=1] dcd
-        cdef cnp.ndarray[DTYPE_t, ndim=1] dwd
+cdef optgradhelper(cnp.ndarray g, int nb_prototypes, cnp.ndarray pidxcorrect, cnp.ndarray pidxwrong,
+                   cnp.ndarray mu, cnp.ndarray distwrong, cnp.ndarray distcorrect, cnp.ndarray distcorrectpluswrong,
+                   cnp.ndarray training_data, cnp.ndarray prototypes):
 
-        d_wrong[label_equals_prototype] = float('inf')
-        distwrong = d_wrong.min(1)
-        pidxwrong = d_wrong.argmin(1)
+    cdef cnp.ndarray[cnp.uint8_t, ndim=1, cast=True] idxc, idxw
+    cdef cnp.ndarray[DTYPE_t, ndim=1] dcd, dwd
+    for i in range(nb_prototypes):
+        idxc = i == pidxcorrect
+        idxw = i == pidxwrong
 
-        d_correct[np.invert(label_equals_prototype)] = float('inf')
-        distcorrect = d_correct.min(1)
-        pidxcorrect = d_correct.argmin(1)
-
-        distcorrectpluswrong = distcorrect + distwrong
-        distcorectminuswrong = distcorrect - distwrong
-        mu = distcorectminuswrong / distcorrectpluswrong
-        mu = beta * np.exp(beta * mu) / (
-                1 + np.exp(beta * mu)) ** 2
-        #mu = np.vectorize(self.phi_prime)(mu)
-
-        distcorrectpluswrong = 4 / distcorrectpluswrong ** 2
-
-        for i in range(nb_prototypes):
-            idxc = i == pidxcorrect
-            idxw = i == pidxwrong
-
-            dcd = mu[idxw] * distcorrect[idxw] * distcorrectpluswrong[idxw]
-            dwd = mu[idxc] * distwrong[idxc] * distcorrectpluswrong[idxc]
-            g[i] = dcd.dot(training_data[idxw]) - dwd.dot(
-                training_data[idxc]) + (dwd.sum(0) -
-                                        dcd.sum(0)) * prototypes[i]
-        g[:nb_prototypes] = 1 / n_data * g[:nb_prototypes]
-        return g
+        dcd = mu[idxw] * distcorrect[idxw] * distcorrectpluswrong[idxw]
+        dwd = mu[idxc] * distwrong[idxc] * distcorrectpluswrong[idxc]
+        g[i] = dcd.dot(training_data[idxw]) - dwd.dot(training_data[idxc]) \
+                   + (dwd.sum(0) - dcd.sum(0)) * prototypes[i]
+    return g
 
 
 class GlvqModel(_LvqBaseModel):
@@ -167,10 +126,49 @@ class GlvqModel(_LvqBaseModel):
 
     def _optgrad(self, variables, training_data, label_equals_prototype,
                  random_state):
-        c_w_ = self.c_w_
-        beta = self.beta
-        g = optgradhelper(variables, training_data, label_equals_prototype, c_w_, beta)
-        g = (g * (1 + 0.0001 * random_state.rand(*g.shape) - 0.5)).astype(DTYPE)
+        n_data, n_dim = training_data.shape
+        nb_prototypes = self.c_w_.size
+        prototypes = variables.reshape(nb_prototypes, n_dim)
+
+        dist = _squared_euclidean(training_data, prototypes.astype(dtype=np.float64))
+        d_wrong = dist.copy()
+        d_wrong[label_equals_prototype] = np.inf
+        distwrong = d_wrong.min(1)
+        pidxwrong = d_wrong.argmin(1)
+
+        d_correct = dist
+        d_correct[np.invert(label_equals_prototype)] = np.inf
+        distcorrect = d_correct.min(1)
+        pidxcorrect = d_correct.argmin(1)
+
+        distcorrectpluswrong = distcorrect + distwrong
+        distcorectminuswrong = distcorrect - distwrong
+        mu = distcorectminuswrong / distcorrectpluswrong
+        mu = self.beta * np.exp(self.beta * mu) / (1 + np.exp(self.beta * mu)) ** 2
+        #mu = np.vectorize(self.phi_prime)(mu)
+
+        np.seterr(all="raise")
+
+        g = np.zeros(prototypes.shape)
+        distcorrectpluswrong = 4 / distcorrectpluswrong ** 2
+
+        g = optgradhelper(g, nb_prototypes, pidxcorrect, pidxwrong, mu, distwrong, distcorrect,
+                                distcorrectpluswrong, training_data, prototypes)
+        g[:nb_prototypes] = 1 / n_data * g[:nb_prototypes]
+        g = g * (1 + 0.0001 * random_state.rand(*g.shape) - 0.5)
+
+        #g = np.zeros(prototypes.shape)
+        #for i in range(nb_prototypes):
+        #    idxc = i == pidxcorrect
+        #    idxw = i == pidxwrong
+
+        #    dcd = mu[idxw] * distcorrect[idxw] * distcorrectpluswrong[idxw]
+        #    dwd = mu[idxc] * distwrong[idxc] * distcorrectpluswrong[idxc]
+        #    g[i] = dcd.dot(training_data[idxw]) - dwd.dot(training_data[idxc]) \
+        #           + (dwd.sum(0) - dcd.sum(0)) * prototypes[i]
+
+        #g[:nb_prototypes] = 1 / n_data * g[:nb_prototypes]
+        #g = g * (1 + 0.0001 * random_state.rand(*g.shape) - 0.5)
         return g.ravel()
 
         # display information
