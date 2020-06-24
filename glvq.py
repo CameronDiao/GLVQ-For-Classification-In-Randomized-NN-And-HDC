@@ -1,8 +1,7 @@
 from __future__ import division
 
 import numpy as np
-from numba import jit, njit, prange
-from decimal import *
+from numba import njit
 from scipy.optimize import minimize
 from scipy.spatial.distance import cdist
 
@@ -112,13 +111,22 @@ class GlvqModel(_LvqBaseModel):
             idxc = i == pidxcorrect
             idxw = i == pidxwrong
 
-            dcd = mu[idxw] * distcorrect[idxw] * distcorrectpluswrong[idxw]
-            dwd = mu[idxc] * distwrong[idxc] * distcorrectpluswrong[idxc]
-            if dcd.size == 0 or dwd.size == 0:
-                g[i] = np.zeros(training_data.shape[1])
-            else:
+            idxc_empty = np.all(idxc == False)
+            idxw_empty = np.all(idxw == False)
+
+            if not idxc_empty and not idxw_empty:
+                dcd = mu[idxw] * distcorrect[idxw] * distcorrectpluswrong[idxw]
+                dwd = mu[idxc] * distwrong[idxc] * distcorrectpluswrong[idxc]
                 g[i] = dcd.dot(training_data[idxw]) - dwd.dot(training_data[idxc]) \
-                   + (dwd.sum(0) - dcd.sum(0)) * prototypes[i]
+                       + (dwd.sum(0) - dcd.sum(0)) * prototypes[i]
+            elif idxc_empty and idxw_empty:
+                g[i] = np.zeros(training_data.shape[1])
+            elif idxc_empty and not idxw_empty:
+                dcd = mu[idxw] * distcorrect[idxw] * distcorrectpluswrong[idxw]
+                g[i] = dcd.dot(training_data[idxw]) + (-dcd.sum(0)) * prototypes[i]
+            else:
+                dwd = mu[idxc] * distwrong[idxc] * distcorrectpluswrong[idxc]
+                g[i] = -dwd.dot(training_data[idxc]) + dwd.sum(0) * prototypes[i]
         return g
 
     def _optgrad(self, variables, training_data, label_equals_prototype,
@@ -148,7 +156,6 @@ class GlvqModel(_LvqBaseModel):
 
         g = np.zeros(prototypes.shape)
         distcorrectpluswrong = 4 / distcorrectpluswrong ** 2
-
 
         g = self._optgradhelper(g, nb_prototypes, pidxcorrect, pidxwrong, mu, distwrong, distcorrect,
                                 distcorrectpluswrong, training_data, prototypes)
