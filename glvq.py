@@ -2,6 +2,7 @@ from __future__ import division
 
 import numpy as np
 from numba import jit, njit, prange
+from decimal import *
 from scipy.optimize import minimize
 from scipy.spatial.distance import cdist
 
@@ -12,13 +13,25 @@ from itertools import product
 
 from lvq import _LvqBaseModel
 
-@jit
+#@jit
+#def _squared_euclidean(a, b=None):
+#    if b is None:
+#        d = np.sum(a ** 2, 1).reshape((1,-1)).T + np.sum(a ** 2, 1) - 2 * (a @ a.T)
+#    else:
+#        d = np.sum(a ** 2, 1).reshape((1,-1)).T + np.sum(b ** 2, 1) - 2 * (a @ b.T)
+#    return np.maximum(d, 0)
+
 def _squared_euclidean(a, b=None):
     if b is None:
-        d = np.sum(a ** 2, 1).reshape((1,-1)).T + np.sum(a ** 2, 1) - 2 * (a @ a.T)
+        d = np.sum(a ** 2, 1)[np.newaxis].T + np.sum(a ** 2, 1) - 2 * a.dot(
+            a.T)
     else:
-        d = np.sum(a ** 2, 1).reshape((1,-1)).T + np.sum(b ** 2, 1) - 2 * (a @ b.T)
+        d = np.sum(a ** 2, 1)[np.newaxis].T + np.sum(b ** 2, 1) - 2 * a.dot(
+            b.T)
     return np.maximum(d, 0)
+
+def err_handler(type, flag):
+    raise FloatingPointError(type)
 
 class GlvqModel(_LvqBaseModel):
     """Generalized Learning Vector Quantization
@@ -92,10 +105,10 @@ class GlvqModel(_LvqBaseModel):
                 1 + np.math.exp(self.beta * x)) ** 2
 
     @staticmethod
-    @njit
+    @njit(debug=True)
     def _optgradhelper(g, nb_prototypes, pidxcorrect, pidxwrong, mu, distwrong, distcorrect, distcorrectpluswrong,
                        training_data, prototypes):
-        for i in prange(nb_prototypes):
+        for i in range(nb_prototypes):
             idxc = i == pidxcorrect
             idxw = i == pidxwrong
 
@@ -103,6 +116,7 @@ class GlvqModel(_LvqBaseModel):
             dwd = mu[idxc] * distwrong[idxc] * distcorrectpluswrong[idxc]
             g[i] = dcd.dot(training_data[idxw]) - dwd.dot(training_data[idxc]) \
                    + (dwd.sum(0) - dcd.sum(0)) * prototypes[i]
+        return g
 
     def _optgrad(self, variables, training_data, label_equals_prototype,
                  random_state):
@@ -127,6 +141,8 @@ class GlvqModel(_LvqBaseModel):
         mu = self.beta * np.exp(self.beta * mu) / (1 + np.exp(self.beta * mu)) ** 2
         #mu = np.vectorize(self.phi_prime)(mu)
 
+        np.seterr(all="raise")
+
         g = np.zeros(prototypes.shape)
         distcorrectpluswrong = 4 / distcorrectpluswrong ** 2
 
@@ -134,6 +150,19 @@ class GlvqModel(_LvqBaseModel):
                                 distcorrectpluswrong, training_data, prototypes)
         g[:nb_prototypes] = 1 / n_data * g[:nb_prototypes]
         g = g * (1 + 0.0001 * random_state.rand(*g.shape) - 0.5)
+
+        #g = np.zeros(prototypes.shape)
+        #for i in range(nb_prototypes):
+        #    idxc = i == pidxcorrect
+        #    idxw = i == pidxwrong
+        #
+        #    dcd = mu[idxw] * distcorrect[idxw] * distcorrectpluswrong[idxw]
+        #    dwd = mu[idxc] * distwrong[idxc] * distcorrectpluswrong[idxc]
+        #    g[i] = dcd.dot(training_data[idxw]) - dwd.dot(training_data[idxc]) \
+        #           + (dwd.sum(0) - dcd.sum(0)) * prototypes[i]
+        #
+        #g[:nb_prototypes] = 1 / n_data * g[:nb_prototypes]
+        #g = g * (1 + 0.0001 * random_state.rand(*g.shape) - 0.5)
         return g.ravel()
 
     def _optfun(self, variables, training_data, label_equals_prototype):
