@@ -105,7 +105,7 @@ class GlvqModel(_LvqBaseModel):
                 1 + np.math.exp(self.beta * x)) ** 2
 
     @staticmethod
-    @njit(debug=True)
+    @njit
     def _optgradhelper(g, nb_prototypes, pidxcorrect, pidxwrong, mu, distwrong, distcorrect, distcorrectpluswrong,
                        training_data, prototypes):
         for i in range(nb_prototypes):
@@ -114,7 +114,10 @@ class GlvqModel(_LvqBaseModel):
 
             dcd = mu[idxw] * distcorrect[idxw] * distcorrectpluswrong[idxw]
             dwd = mu[idxc] * distwrong[idxc] * distcorrectpluswrong[idxc]
-            g[i] = dcd.dot(training_data[idxw]) - dwd.dot(training_data[idxc]) \
+            if dcd.size == 0 or dwd.size == 0:
+                g[i] = np.zeros(training_data.shape[1])
+            else:
+                g[i] = dcd.dot(training_data[idxw]) - dwd.dot(training_data[idxc]) \
                    + (dwd.sum(0) - dcd.sum(0)) * prototypes[i]
         return g
 
@@ -146,6 +149,7 @@ class GlvqModel(_LvqBaseModel):
         g = np.zeros(prototypes.shape)
         distcorrectpluswrong = 4 / distcorrectpluswrong ** 2
 
+
         g = self._optgradhelper(g, nb_prototypes, pidxcorrect, pidxwrong, mu, distwrong, distcorrect,
                                 distcorrectpluswrong, training_data, prototypes)
         g[:nb_prototypes] = 1 / n_data * g[:nb_prototypes]
@@ -163,6 +167,17 @@ class GlvqModel(_LvqBaseModel):
         #
         #g[:nb_prototypes] = 1 / n_data * g[:nb_prototypes]
         #g = g * (1 + 0.0001 * random_state.rand(*g.shape) - 0.5)
+
+        # display information
+        # y_real = np.where(label_equals_prototype)[1]
+        # y_real = np.floor(y_real[::self.prototypes_per_class] / self.prototypes_per_class).astype(dtype=int)
+        # y_pred = self._compute_distance(training_data, prototypes)
+        # y_pred = self.c_w_[y_pred.argmin(1)].astype(dtype=int)
+        # acc = np.count_nonzero(y_real == y_pred)
+        # acc = acc / len(y_real)
+        # print("Iteration Number: {:3} \n {} \n Accuracy: {} \n".format(
+        #    self.num, prototypes, acc))
+        # self.num += 1
         return g.ravel()
 
     def _optfun(self, variables, training_data, label_equals_prototype):
