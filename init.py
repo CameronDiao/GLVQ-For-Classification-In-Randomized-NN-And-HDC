@@ -3,7 +3,6 @@ import scipy as sc
 from numba import njit, vectorize, float64, prange
 import sklearn_lvq
 import math
-import glvq
 
 def preprocess(dataset):
     """
@@ -30,7 +29,7 @@ def preprocess(dataset):
 def quantize(elem, n):
     return int(round(elem * n))
 
-@njit(parallel=True)
+@njit
 def density_encoding(dataset, n):
     """
     Applies density-based encoding to feature values of dataset
@@ -84,7 +83,7 @@ def activation_matrix(dataset, w_in, b):
     h_matrix = sigmoid(h_matrix)
     return h_matrix
 
-@njit(parallel=True)
+@njit
 def enc_activation_matrix(dataset, w_in, kappa):
     """
     Constructs the matrix H of hidden layer activation values from the density-based representation layer
@@ -150,6 +149,6 @@ def readout_matrix_lvq(h_matrix, y_matrix):
     """
     h_matrix = h_matrix.astype(dtype=np.float32)
     y_matrix = y_matrix.astype(dtype=np.float32)
-    w_out = glvq.GlvqModel()
+    w_out = sklearn_lvq.GlvqModel()
     w_out.fit(h_matrix, y_matrix)
-    return w_out
+    return w_out #w_out.iteracc
