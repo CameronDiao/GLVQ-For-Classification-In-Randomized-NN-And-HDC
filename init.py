@@ -152,4 +152,4 @@ def readout_matrix_lvq(h_matrix, y_matrix):
     #y_matrix = y_matrix.astype(dtype=np.float32)
     w_out = glvq.GlvqModel(prototypes_per_class=3, beta=13)
     w_out.fit(h_matrix, y_matrix)
-    return w_out
+    return w_out #w_out.iteracc

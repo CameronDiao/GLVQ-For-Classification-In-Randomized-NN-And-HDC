@@ -72,7 +72,7 @@ def lvq_model(train_set, test_set, n, kappa):
     # Store ground truth classifications of training examples
     y_matrix = train_set["clase"].values
     # Compute readout matrix from h_matrix, y_matrix
-    w_out = init.readout_matrix_lvq(h_matrix, y_matrix)
+    w_out = init.readout_matrix_lvq(h_matrix, y_matrix) #iter_acc
 
     # Apply density-based encoding to feature values of testing data
     test_features = test_set.drop(["clase"], axis=1)
@@ -84,7 +84,7 @@ def lvq_model(train_set, test_set, n, kappa):
     #test_pred = w_out.predict(h_matrix)
 
     # Score prediction accuracy of LVQ classifier model w_out
-    return w_out.score(h_matrix, test_set["clase"].values)
+    return w_out.score(h_matrix, test_set["clase"].values), iter_acc
 
 def direct_lvq_model(train_set, test_set):
     """

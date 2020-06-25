@@ -16,12 +16,14 @@ def kf_model_accuracy(test_train, lmb, n, kappa):
     # Count number of folds
     num_folds = len(fold_sets)
     sum_acc = 0
+    #iter_acc = {}
     for fold in fold_sets:
         # Calculate model accuracy for individual folds
-        fold_acc = tt.lvq_model(fold_sets[fold]["Train"], fold_sets[fold]["Test"], n, kappa)
+        fold_acc = tt.lvq_model(fold_sets[fold]["Train"], fold_sets[fold]["Test"], n, kappa) #temp_acc
         sum_acc += fold_acc
+        #iter_acc.update(temp_acc)
     # Return average model accuracy across all folds
-    return sum_acc / num_folds
+    return sum_acc / num_folds #iter_acc
 
 def tt_model_accuracy(test_train, lmb, n, kappa):
     """
@@ -37,5 +39,5 @@ def tt_model_accuracy(test_train, lmb, n, kappa):
     train_set = test_train[name]["Train"]
     test_set = test_train[name]["Test"]
 
-    acc = tt.lvq_model(train_set, test_set, n, kappa)
-    return acc
+    acc = tt.lvq_model(train_set, test_set, n, kappa) #iter_acc
+    return acc #iter_acc

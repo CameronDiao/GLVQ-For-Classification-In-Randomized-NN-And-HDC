@@ -85,6 +85,8 @@ class GlvqModel(_LvqBaseModel):
                                         random_state=random_state)
         self.beta = beta
         self.c = C
+        self.num = 0
+        #self.iteracc = {}
 
     def phi(self, x):
         """
@@ -102,6 +104,18 @@ class GlvqModel(_LvqBaseModel):
         """
         return self.beta * np.math.exp(self.beta * x) / (
                 1 + np.math.exp(self.beta * x)) ** 2
+
+
+    def _iteracc(self, training_data, label_equals_prototype, prototypes):
+        y_real = np.where(label_equals_prototype)[1]
+        y_real = np.floor(y_real[::self.prototypes_per_class] / self.prototypes_per_class).astype(dtype=int)
+        y_pred = self._compute_distance(training_data, prototypes)
+        y_pred = self.c_w_[y_pred.argmin(1)].astype(dtype=int)
+        acc = np.count_nonzero(y_real == y_pred) / len(y_real)
+        print("Iteration Number: {:3} \n {} \n Accuracy: {} \n".format(
+            self.num, prototypes, acc))
+        #self.iteracc[self.num] = acc
+        self.num += 1
 
     @staticmethod
     @njit
@@ -176,15 +190,7 @@ class GlvqModel(_LvqBaseModel):
         #g = g * (1 + 0.0001 * random_state.rand(*g.shape) - 0.5)
 
         # display information
-        # y_real = np.where(label_equals_prototype)[1]
-        # y_real = np.floor(y_real[::self.prototypes_per_class] / self.prototypes_per_class).astype(dtype=int)
-        # y_pred = self._compute_distance(training_data, prototypes)
-        # y_pred = self.c_w_[y_pred.argmin(1)].astype(dtype=int)
-        # acc = np.count_nonzero(y_real == y_pred)
-        # acc = acc / len(y_real)
-        # print("Iteration Number: {:3} \n {} \n Accuracy: {} \n".format(
-        #    self.num, prototypes, acc))
-        # self.num += 1
+        #self._iteracc(training_data, label_equals_prototype, prototypes)
         return g.ravel()
 
     def _optfun(self, variables, training_data, label_equals_prototype):
