@@ -21,11 +21,11 @@ from lvq import _LvqBaseModel
 
 def _squared_euclidean(a, b=None):
     if b is None:
-        sub = a.dot(a.T)
+        sub = a @ a.T
         d = ne.evaluate("sum(a ** 2, 1)")[np.newaxis].T + ne.evaluate("sum(a ** 2, 1)") - \
             ne.evaluate("2 * sub")
     else:
-        sub = a.dot(b.T)
+        sub = a @ b.T
         d = ne.evaluate("sum(a ** 2, 1)")[np.newaxis].T + ne.evaluate("sum(b ** 2, 1)") - \
             ne.evaluate("2 * sub")
     return np.maximum(d, 0)
@@ -128,16 +128,16 @@ class GlvqModel(_LvqBaseModel):
             if not idxc_empty and not idxw_empty:
                 dcd = mu[idxw] * distcorrect[idxw] * distcorrectpluswrong[idxw]
                 dwd = mu[idxc] * distwrong[idxc] * distcorrectpluswrong[idxc]
-                g[i] = dcd.dot(training_data[idxw]) - dwd.dot(training_data[idxc]) \
+                g[i] = (dcd @ training_data[idxw]) - (dwd @ training_data[idxc]) \
                        + (dwd.sum(0) - dcd.sum(0)) * prototypes[i]
             elif idxc_empty and idxw_empty:
                 g[i] = np.zeros(training_data.shape[1])
             elif idxc_empty and not idxw_empty:
                 dcd = mu[idxw] * distcorrect[idxw] * distcorrectpluswrong[idxw]
-                g[i] = dcd.dot(training_data[idxw]) + (-dcd.sum(0)) * prototypes[i]
+                g[i] = (dcd @ training_data[idxw]) - dcd.sum(0) * prototypes[i]
             else:
                 dwd = mu[idxc] * distwrong[idxc] * distcorrectpluswrong[idxc]
-                g[i] = -dwd.dot(training_data[idxc]) + dwd.sum(0) * prototypes[i]
+                g[i] = (np.negative(dwd) @ training_data[idxc]) + dwd.sum(0) * prototypes[i]
         return g
 
     def _optgrad(self, variables, training_data, label_equals_prototype,

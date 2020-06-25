@@ -84,7 +84,7 @@ def lvq_model(train_set, test_set, n, kappa):
     #test_pred = w_out.predict(h_matrix)
 
     # Score prediction accuracy of LVQ classifier model w_out
-    return w_out.score(h_matrix, test_set["clase"].values), iter_acc
+    return w_out.score(h_matrix, test_set["clase"].values) #iter_acc
 
 def direct_lvq_model(train_set, test_set):
     """

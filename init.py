@@ -1,8 +1,8 @@
 import numpy as np
 import scipy as sc
-from numba import njit, vectorize, float64, prange
-import sklearn_lvq
+from numba import njit, vectorize, float64
 import glvq
+import sklearn_lvq
 import math
 
 def preprocess(dataset):
@@ -44,10 +44,10 @@ def density_encoding(dataset, n):
     In this instance, a Series object of size M containing numpy 2-D arrays of shape N x K
     """
     enc_ds = np.zeros((dataset.shape[0], n, dataset.shape[1]))
-    for row in prange(dataset.shape[0]):
+    for row in range(dataset.shape[0]):
         x = quantize(dataset[row], np.float64(n))
         enc_matrix = np.ones((x.size, n))
-        for vec in prange(enc_matrix.shape[0]):
+        for vec in range(enc_matrix.shape[0]):
             enc_matrix[vec][0:int(x[vec])] = -1
         enc_ds[row] = enc_matrix.T
     return enc_ds
@@ -99,7 +99,7 @@ def enc_activation_matrix(dataset, w_in, kappa):
     In this instance, a Series object of size M containing numpy 1-D arrays of size N
     """
     h_matrix = np.zeros((dataset.shape[0], dataset.shape[1]))
-    for row in prange(dataset.shape[0]):
+    for row in range(dataset.shape[0]):
         x = dataset[row]
         h = np.sum(np.multiply(x, w_in), axis=1)
         for i, elem in np.ndenumerate(h):
