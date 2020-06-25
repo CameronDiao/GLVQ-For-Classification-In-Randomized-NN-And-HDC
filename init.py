@@ -2,6 +2,7 @@ import numpy as np
 import scipy as sc
 from numba import njit, vectorize, float64, prange
 import sklearn_lvq
+import glvq
 import math
 
 def preprocess(dataset):
@@ -147,8 +148,8 @@ def readout_matrix_lvq(h_matrix, y_matrix):
     :param y_matrix: a DataFrame object of dimension M x 1 containing sample classifications
     :return: w_out: an LVQ Model object
     """
-    h_matrix = h_matrix.astype(dtype=np.float32)
-    y_matrix = y_matrix.astype(dtype=np.float32)
-    w_out = sklearn_lvq.GlvqModel()
+    #h_matrix = h_matrix.astype(dtype=np.float32)
+    #y_matrix = y_matrix.astype(dtype=np.float32)
+    w_out = glvq.GlvqModel(prototypes_per_class=3, beta=13)
     w_out.fit(h_matrix, y_matrix)
     return w_out #w_out.iteracc
