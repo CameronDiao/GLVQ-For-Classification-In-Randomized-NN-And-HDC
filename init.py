@@ -2,8 +2,8 @@ import numpy as np
 import scipy as sc
 from numba import njit, vectorize, float64, prange
 import sklearn_lvq
-import math
 import glvq
+import math
 
 def preprocess(dataset):
     """

@@ -1,6 +1,13 @@
+# -*- coding: utf-8 -*-
+
+# Author: Joris Jensen <jjensen@techfak.uni-bielefeld.de>
+#
+# License: BSD 3 clause
+
 from __future__ import division
 
 import numpy as np
+import numexpr as ne
 from numba import njit
 from scipy.optimize import minimize
 from scipy.spatial.distance import cdist
@@ -12,25 +19,16 @@ from itertools import product
 
 from lvq import _LvqBaseModel
 
-#@jit
-#def _squared_euclidean(a, b=None):
-#    if b is None:
-#        d = np.sum(a ** 2, 1).reshape((1,-1)).T + np.sum(a ** 2, 1) - 2 * (a @ a.T)
-#    else:
-#        d = np.sum(a ** 2, 1).reshape((1,-1)).T + np.sum(b ** 2, 1) - 2 * (a @ b.T)
-#    return np.maximum(d, 0)
-
 def _squared_euclidean(a, b=None):
     if b is None:
-        d = np.sum(a ** 2, 1)[np.newaxis].T + np.sum(a ** 2, 1) - 2 * a.dot(
-            a.T)
+        sub = a.dot(a.T)
+        d = ne.evaluate("sum(a ** 2, 1)")[np.newaxis].T + ne.evaluate("sum(a ** 2, 1)") - \
+            ne.evaluate("2 * sub")
     else:
-        d = np.sum(a ** 2, 1)[np.newaxis].T + np.sum(b ** 2, 1) - 2 * a.dot(
-            b.T)
+        sub = a.dot(b.T)
+        d = ne.evaluate("sum(a ** 2, 1)")[np.newaxis].T + ne.evaluate("sum(b ** 2, 1)") - \
+            ne.evaluate("2 * sub")
     return np.maximum(d, 0)
-
-def err_handler(type, flag):
-    raise FloatingPointError(type)
 
 class GlvqModel(_LvqBaseModel):
     """Generalized Learning Vector Quantization
@@ -85,7 +83,7 @@ class GlvqModel(_LvqBaseModel):
                                         random_state=random_state)
         self.beta = beta
         self.c = C
-        self.num = 0
+        #self.num = 0
         #self.iteracc = {}
 
     def phi(self, x):
@@ -104,7 +102,6 @@ class GlvqModel(_LvqBaseModel):
         """
         return self.beta * np.math.exp(self.beta * x) / (
                 1 + np.math.exp(self.beta * x)) ** 2
-
 
     def _iteracc(self, training_data, label_equals_prototype, prototypes):
         y_real = np.where(label_equals_prototype)[1]
@@ -149,7 +146,7 @@ class GlvqModel(_LvqBaseModel):
         nb_prototypes = self.c_w_.size
         prototypes = variables.reshape(nb_prototypes, n_dim)
 
-        dist = _squared_euclidean(training_data, prototypes.astype(dtype=np.float64))
+        dist = _squared_euclidean(training_data, prototypes)
         d_wrong = dist.copy()
         d_wrong[label_equals_prototype] = np.inf
         distwrong = d_wrong.min(1)
@@ -165,8 +162,6 @@ class GlvqModel(_LvqBaseModel):
         mu = distcorectminuswrong / distcorrectpluswrong
         mu = self.beta * np.exp(self.beta * mu) / (1 + np.exp(self.beta * mu)) ** 2
         #mu = np.vectorize(self.phi_prime)(mu)
-
-        np.seterr(all="raise")
 
         g = np.zeros(prototypes.shape)
         distcorrectpluswrong = 4 / distcorrectpluswrong ** 2
@@ -213,7 +208,8 @@ class GlvqModel(_LvqBaseModel):
         [self._map_to_int(x) for x in self.c_w_[label_equals_prototype.argmax(1)]]
         mu *= self.c_[label_equals_prototype.argmax(1), d_wrong.argmin(1)]  # y_real, y_pred
 
-        return (1 / (1 + np.exp(-self.beta * mu))).sum(0)
+        mu = 1 / (1 + np.exp(-self.beta * mu))
+        return mu.sum(0)
         # return np.vectorize(self.phi)(mu).sum(0)
 
     def _validate_train_parms(self, train_set, train_lab):
