@@ -35,9 +35,11 @@ def _squared_euclidean(a, b=None):
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-cdef optgradhelper(cnp.ndarray g, int nb_prototypes, cnp.ndarray pidxcorrect, cnp.ndarray pidxwrong,
-                   cnp.ndarray mu, cnp.ndarray distwrong, cnp.ndarray distcorrect, cnp.ndarray distcorrectpluswrong,
-                   cnp.ndarray training_data, cnp.ndarray prototypes):
+cdef optgradhelper(cnp.ndarray[DTYPE_t, ndim=2] g, int nb_prototypes, cnp.ndarray[cnp.int64_t, ndim=1] pidxcorrect,
+                   cnp.ndarray[cnp.int64_t, ndim=1] pidxwrong, cnp.ndarray[DTYPE_t, ndim=1] mu,
+                   cnp.ndarray[DTYPE_t, ndim=1] distwrong, cnp.ndarray[DTYPE_t, ndim=1] distcorrect,
+                   cnp.ndarray[DTYPE_t, ndim=1] distcorrectpluswrong, cnp.ndarray[DTYPE_t, ndim=2] training_data,
+                   cnp.ndarray[DTYPE_t, ndim=2] prototypes):
 
     cdef cnp.ndarray[cnp.uint8_t, ndim=1, cast=True] idxc, idxw
     cdef cnp.ndarray[DTYPE_t, ndim=1] dcd, dwd
@@ -47,8 +49,8 @@ cdef optgradhelper(cnp.ndarray g, int nb_prototypes, cnp.ndarray pidxcorrect, cn
 
         dcd = mu[idxw] * distcorrect[idxw] * distcorrectpluswrong[idxw]
         dwd = mu[idxc] * distwrong[idxc] * distcorrectpluswrong[idxc]
-        g[i] = dcd.dot(training_data[idxw]) - dwd.dot(training_data[idxc]) \
-                   + (dwd.sum(0) - dcd.sum(0)) * prototypes[i]
+        g[i] = (dcd @ training_data[idxw]) - (dwd @ training_data[idxc]) \
+                   + (dwd.sum(axis=0) - dcd.sum(axis=0)) * prototypes[i]
     return g
 
 
@@ -147,9 +149,7 @@ class GlvqModel(_LvqBaseModel):
         mu = self.beta * np.exp(self.beta * mu) / (1 + np.exp(self.beta * mu)) ** 2
         #mu = np.vectorize(self.phi_prime)(mu)
 
-        np.seterr(all="raise")
-
-        g = np.zeros(prototypes.shape)
+        g = np.zeros(prototypes.shape, dtype=DTYPE)
         distcorrectpluswrong = 4 / distcorrectpluswrong ** 2
 
         g = optgradhelper(g, nb_prototypes, pidxcorrect, pidxwrong, mu, distwrong, distcorrect,
