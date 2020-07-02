@@ -1,8 +1,0 @@
-n_entradas= 15
-n_clases= 2
-n_arquivos= 1
-fich1= credit-approval_R.dat
-n_patrons1= 690
-n_patrons_entrena= 345
-n_patrons_valida= 345
-n_conxuntos= 1

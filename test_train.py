@@ -49,7 +49,7 @@ def test_train_model(train_set, test_set, lmb, n):
     return correct / len(test_class)
 
 
-def lvq_model(train_set, test_set, n, kappa):
+def lvq_model(train_set, test_set, n, kappa, ppc, beta):
     """
     Constructs a neural network employing LVQ classification for predicting the class types of testing samples
     :param train_set: a pandas DataFrame containing training samples with their respective feature values
@@ -72,7 +72,7 @@ def lvq_model(train_set, test_set, n, kappa):
     # Store ground truth classifications of training examples
     y_matrix = train_set["clase"].values
     # Compute readout matrix from h_matrix, y_matrix
-    w_out = init.readout_matrix_lvq(h_matrix, y_matrix) #iter_acc
+    w_out = init.readout_matrix_lvq(h_matrix, y_matrix, ppc, beta) #iter_acc
 
     # Apply density-based encoding to feature values of testing data
     test_features = test_set.drop(["clase"], axis=1)
@@ -86,7 +86,7 @@ def lvq_model(train_set, test_set, n, kappa):
     # Score prediction accuracy of LVQ classifier model w_out
     return w_out.score(h_matrix, test_set["clase"].values) #iter_acc
 
-def direct_lvq_model(train_set, test_set):
+def direct_lvq_model(train_set, test_set, ppc, beta):
     """
         Constructs an LVQ classifier model for predicting the class types of testing samples directly from
         feature values
@@ -100,7 +100,7 @@ def direct_lvq_model(train_set, test_set):
     train_features = train_set.drop(["clase"], axis=1)
     train_features = train_features.values
     # Fit an LVQ classifier model to the feature values of the training data
-    w_out = init.readout_matrix_lvq(train_features, train_set["clase"].values)
+    w_out = init.readout_matrix_lvq(train_features, train_set["clase"].values, ppc, beta)
 
     # Compute the activation matrix of the hidden layer
     test_features = test_set.drop(["clase"], axis=1)

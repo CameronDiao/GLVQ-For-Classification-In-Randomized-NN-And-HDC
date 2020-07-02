@@ -1,8 +1,0 @@
-n_entradas= 18
-n_clases= 7
-n_arquivos= 1
-fich1= statlog-image_R.dat
-n_patrons1= 2310
-n_patrons_entrena= 1155
-n_patrons_valida= 1155
-n_conxuntos= 1

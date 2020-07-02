@@ -1,6 +1,6 @@
 import test_train as tt
 
-def kf_model_accuracy(test_train, lmb, n, kappa):
+def kf_model_accuracy(test_train, lmb, n, kappa, ppc, beta):
     """
     Computes prediction model accuracy across k folds on the dataset partitioned in test_train
     :param test_train: a dictionary mapping the label of each study parent_name to its dataset,
@@ -17,15 +17,20 @@ def kf_model_accuracy(test_train, lmb, n, kappa):
     num_folds = len(fold_sets)
     sum_acc = 0
     #iter_acc = {}
+    # Calculate model accuracy for individual folds
     for fold in fold_sets:
-        # Calculate model accuracy for individual folds
-        fold_acc = tt.lvq_model(fold_sets[fold]["Train"], fold_sets[fold]["Test"], n, kappa) #temp_acc
+        # For RVFL networks
+        #fold_acc = tt.encoding_model(fold_sets[fold]["Train"], fold_sets[fold]["Test"], lmb, n, kappa)
+        # For LVQ networks
+        fold_acc = tt.lvq_model(fold_sets[fold]["Train"], fold_sets[fold]["Test"], n, kappa, ppc, beta) #temp_acc
+        # For LVQ classifiers
+        #fold_acc = tt.direct_lvq_model(fold_sets[fold]["Train"], fold_sets[fold]["Test"], ppc, beta)
         sum_acc += fold_acc
         #iter_acc.update(temp_acc)
     # Return average model accuracy across all folds
     return sum_acc / num_folds #iter_acc
 
-def tt_model_accuracy(test_train, lmb, n, kappa):
+def tt_model_accuracy(test_train, lmb, n, kappa, ppc, beta):
     """
     Computes prediction model accuracy on the dataset in test_train
     :param test_train: a dictionary mapping the label of each study parent_name to its
@@ -39,5 +44,10 @@ def tt_model_accuracy(test_train, lmb, n, kappa):
     train_set = test_train[name]["Train"]
     test_set = test_train[name]["Test"]
 
-    acc = tt.lvq_model(train_set, test_set, n, kappa) #iter_acc
+    # For RVFL networks
+    # fold_acc = tt.encoding_model(train_set, test_set, lmb, n, kappa)
+    # For LVQ networks
+    acc = tt.lvq_model(train_set, test_set, n, kappa, ppc, beta)  # iter_acc
+    # For LVQ classifiers
+    # fold_acc = tt.direct_lvq_model(train_set, test_set, ppc, beta)
     return acc #iter_acc

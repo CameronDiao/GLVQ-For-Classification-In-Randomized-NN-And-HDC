@@ -1,8 +1,0 @@
-n_entradas= 42
-n_clases= 2
-n_arquivos= 1
-fich1= connect-4_R.dat
-n_patrons1= 67557
-n_patrons_entrena= 33779
-n_patrons_valida= 33778
-n_conxuntos= 1

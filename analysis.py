@@ -1,5 +1,6 @@
 import load_data as ld
 import model_accuracy as ma
+import numpy as np
 import scipy.io as sc
 import time
 
@@ -11,8 +12,9 @@ ld.scan_folder("/Users/camerondiao/Documents/HDResearch/DataManip/data", "data",
 
 # load optimal hyperparameters
 simul=5 # number of runs for random parameter initialization
-elm_opt_param=sc.loadmat('/Users/camerondiao/Documents/HDResearch/DataManip/i_elm_opt_param.mat') #initial feature set
-elm_opt_param=(elm_opt_param['i_elm_opt_param'])
+#elm_opt_param=sc.loadmat('/Users/camerondiao/Documents/HDResearch/DataManip/i_elm_opt_param.mat') #initial feature set
+#elm_opt_param=(elm_opt_param['i_elm_opt_param'])
+elm_opt_param = np.genfromtxt('mid_param.csv', delimiter='\t')
 
 # Gather accuracies for each dataset
 tt_data = list(test_train.keys())
@@ -29,6 +31,9 @@ for sim in range(simul):  # for simul initializations
         lmb = elm_opt_param[i, 1]
         kappa = int(elm_opt_param[i, 2])
 
+        ppc = int(elm_opt_param[i, 3])
+        beta = int(elm_opt_param[i, 4])
+
         print(sim, i)
         key=total_data[i]
         if key in tt_data:  # if dataset is in tt_data
@@ -39,7 +44,7 @@ for sim in range(simul):  # for simul initializations
             temp[key]["Test"] = test_train.get(key)["Test"]
 
             # accuracy_all[i]=tt.model_accuracy(temp, lmb, n)[0]
-            accuracy_all[i].append(ma.tt_model_accuracy(temp, lmb, n, kappa))
+            accuracy_all[i].append(ma.tt_model_accuracy(temp, n, lmb, kappa, ppc, beta))
         else:  # if dataset is in kf_data
             temp = {}
             temp[key] = {}
@@ -62,7 +67,7 @@ for sim in range(simul):  # for simul initializations
 
             # Recreate dictionary structure with only the current dataset
             # accuracy_all[i]=kf.model_accuracy(temp, lmb, n)[0]
-            accuracy_all[i].append(ma.kf_model_accuracy(temp, lmb, n, kappa))
+            accuracy_all[i].append(ma.kf_model_accuracy(temp, n, lmb, kappa, ppc, beta))
 
 # Accuracy mean
 accuracy_all_s = [sum(elm) / simul for elm in accuracy_all]  # mean values for each dataset accross simulations

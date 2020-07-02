@@ -1,8 +1,0 @@
-n_entradas= 7
-n_clases= 3
-n_arquivos= 1
-fich1= pittsburg-bridges-REL-L_R.dat
-n_patrons1= 103
-n_patrons_entrena= 52
-n_patrons_valida= 51
-n_conxuntos= 1

@@ -1,8 +1,0 @@
-n_entradas= 33
-n_clases= 2
-n_arquivos= 1
-fich1= ionosphere_R.dat
-n_patrons1= 351
-n_patrons_entrena= 176
-n_patrons_valida= 175
-n_conxuntos= 1

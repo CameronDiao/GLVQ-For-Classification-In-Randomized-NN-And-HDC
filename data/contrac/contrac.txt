@@ -1,8 +1,0 @@
-n_entradas= 9
-n_clases= 3
-n_arquivos= 1
-fich1= contrac_R.dat
-n_patrons1= 1473
-n_patrons_entrena= 737
-n_patrons_valida= 736
-n_conxuntos= 1

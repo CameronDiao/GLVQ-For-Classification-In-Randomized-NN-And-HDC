@@ -1,8 +1,0 @@
-n_entradas= 19
-n_clases= 2
-n_arquivos= 1
-fich1= hepatitis_R.dat
-n_patrons1= 155
-n_patrons_entrena= 78
-n_patrons_valida= 77
-n_conxuntos= 1

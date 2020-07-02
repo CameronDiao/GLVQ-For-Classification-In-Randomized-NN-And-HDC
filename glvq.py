@@ -8,7 +8,6 @@ from __future__ import division
 
 import numpy as np
 import numexpr as ne
-from numba import njit
 from scipy.optimize import minimize
 from scipy.spatial.distance import cdist
 
@@ -17,7 +16,7 @@ from sklearn.utils.multiclass import unique_labels
 from sklearn.utils.validation import check_is_fitted
 from itertools import product
 
-from lvq import _LvqBaseModel
+from sklearn_lvq.lvq import _LvqBaseModel
 
 def _squared_euclidean(a, b=None):
     if b is None:
@@ -84,7 +83,6 @@ class GlvqModel(_LvqBaseModel):
         self.beta = beta
         self.c = C
         #self.num = 0
-        #self.iteracc = {}
 
     def phi(self, x):
         """
@@ -111,34 +109,7 @@ class GlvqModel(_LvqBaseModel):
         acc = np.count_nonzero(y_real == y_pred) / len(y_real)
         print("Iteration Number: {:3} \n {} \n Accuracy: {} \n".format(
             self.num, prototypes, acc))
-        #self.iteracc[self.num] = acc
         self.num += 1
-
-    @staticmethod
-    @njit
-    def _optgradhelper(g, nb_prototypes, pidxcorrect, pidxwrong, mu, distwrong, distcorrect, distcorrectpluswrong,
-                       training_data, prototypes):
-        for i in range(nb_prototypes):
-            idxc = i == pidxcorrect
-            idxw = i == pidxwrong
-
-            idxc_empty = np.all(idxc == False)
-            idxw_empty = np.all(idxw == False)
-
-            if not idxc_empty and not idxw_empty:
-                dcd = mu[idxw] * distcorrect[idxw] * distcorrectpluswrong[idxw]
-                dwd = mu[idxc] * distwrong[idxc] * distcorrectpluswrong[idxc]
-                g[i] = (dcd @ training_data[idxw]) - (dwd @ training_data[idxc]) \
-                       + (dwd.sum(0) - dcd.sum(0)) * prototypes[i]
-            elif idxc_empty and idxw_empty:
-                g[i] = np.zeros(training_data.shape[1])
-            elif idxc_empty and not idxw_empty:
-                dcd = mu[idxw] * distcorrect[idxw] * distcorrectpluswrong[idxw]
-                g[i] = (dcd @ training_data[idxw]) - dcd.sum(0) * prototypes[i]
-            else:
-                dwd = mu[idxc] * distwrong[idxc] * distcorrectpluswrong[idxc]
-                g[i] = (np.negative(dwd) @ training_data[idxc]) + dwd.sum(0) * prototypes[i]
-        return g
 
     def _optgrad(self, variables, training_data, label_equals_prototype,
                  random_state):
@@ -166,23 +137,17 @@ class GlvqModel(_LvqBaseModel):
         g = np.zeros(prototypes.shape)
         distcorrectpluswrong = 4 / distcorrectpluswrong ** 2
 
-        g = self._optgradhelper(g, nb_prototypes, pidxcorrect, pidxwrong, mu, distwrong, distcorrect,
-                                distcorrectpluswrong, training_data, prototypes)
+        for i in range(nb_prototypes):
+            idxc = i == pidxcorrect
+            idxw = i == pidxwrong
+
+            dcd = mu[idxw] * distcorrect[idxw] * distcorrectpluswrong[idxw]
+            dwd = mu[idxc] * distwrong[idxc] * distcorrectpluswrong[idxc]
+            g[i] = dcd.dot(training_data[idxw]) - dwd.dot(training_data[idxc]) \
+                   + (dwd.sum(0) - dcd.sum(0)) * prototypes[i]
+
         g[:nb_prototypes] = 1 / n_data * g[:nb_prototypes]
         g = g * (1 + 0.0001 * random_state.rand(*g.shape) - 0.5)
-
-        #g = np.zeros(prototypes.shape)
-        #for i in range(nb_prototypes):
-        #    idxc = i == pidxcorrect
-        #    idxw = i == pidxwrong
-        #
-        #    dcd = mu[idxw] * distcorrect[idxw] * distcorrectpluswrong[idxw]
-        #    dwd = mu[idxc] * distwrong[idxc] * distcorrectpluswrong[idxc]
-        #    g[i] = dcd.dot(training_data[idxw]) - dwd.dot(training_data[idxc]) \
-        #           + (dwd.sum(0) - dcd.sum(0)) * prototypes[i]
-        #
-        #g[:nb_prototypes] = 1 / n_data * g[:nb_prototypes]
-        #g = g * (1 + 0.0001 * random_state.rand(*g.shape) - 0.5)
 
         # display information
         #self._iteracc(training_data, label_equals_prototype, prototypes)

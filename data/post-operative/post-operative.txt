@@ -1,8 +1,0 @@
-n_entradas= 8
-n_clases= 3
-n_arquivos= 1
-fich1= post-operative_R.dat
-n_patrons1= 90
-n_patrons_entrena= 45
-n_patrons_valida= 45
-n_conxuntos= 1

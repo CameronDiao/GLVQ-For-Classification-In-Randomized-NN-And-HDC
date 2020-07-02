@@ -1,8 +1,0 @@
-n_entradas= 32
-n_clases= 3
-n_arquivos= 1
-fich1= oocytes_trisopterus_states_5b_R.dat
-n_patrons1= 912
-n_patrons_entrena= 456
-n_patrons_valida= 456
-n_conxuntos= 1

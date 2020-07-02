@@ -1,6 +1,0 @@
-The titanic dataset gives the values of four categorical attributes
-for each of the 2201 people on board the Titanic when it struck an
-iceberg and sank.  The attributes are social class (first class,
-second class, third class, or crewmember), age (adult or child), sex,
-and whether or not the person survived.  The question of interest is
-considered to be how survival relates to the other attributes.

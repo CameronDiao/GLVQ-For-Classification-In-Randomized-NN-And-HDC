@@ -1,1 +1,0 @@
-cat *.dat > vehicle.data

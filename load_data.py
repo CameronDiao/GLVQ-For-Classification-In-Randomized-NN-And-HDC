@@ -34,6 +34,16 @@ def read_indices(file_path, dataset):
         fold_sets[(idx / 2) + 1] = idx_list
     return fold_sets
 
+def read_test_train(file_path, dataset):
+    with open(file_path, "r") as f:
+        reader = f.readlines()
+    train_indices = reader[0].strip().split(" ")
+    test_indices = reader[1].strip().split(" ")
+    train_set = dataset[dataset.index.isin(train_indices)]
+    test_set = dataset[dataset.index.isin(test_indices)]
+    tt_sets = {"Train": train_set, "Test": test_set}
+    return tt_sets
+
 def scan_folder(parent, parent_name, test_train, k_fold):
     """
     Separates the files of a given folder into testing/training datasets and cross validation datasets
@@ -73,3 +83,33 @@ def scan_folder(parent, parent_name, test_train, k_fold):
             if os.path.isdir(current_path):
                 # if we're checking a sub-directory, recall this method
                 scan_folder(current_path, file_name, test_train, k_fold)
+
+def scan_folder_gs(parent, parent_name, test_train):
+    files_in = [item for item in os.listdir(parent) if re.match(".+\..+", item)]
+    if len(files_in) > 0:
+        test_type = parent_name + "_R.dat"
+        if test_type not in files_in:
+            train_set = "".join((parent, "/", parent_name + "_train_R.dat"))
+            test_set = "".join((parent, "/", parent_name + "_test_R.dat"))
+            train_reader = read_set(train_set)
+            train_reader = init.preprocess(train_reader)
+
+            test_reader = read_set(test_set)
+            test_reader = init.preprocess(test_reader)
+
+            data_list = {"Train": train_reader, "Test": test_reader}
+            test_train[parent_name] = data_list
+        else:
+            data_set = "".join((parent, "/", test_type))
+            data_reader = read_set(data_set)
+            data_reader = init.preprocess(data_reader)
+
+            idx_set = "".join((parent, "/conxuntos.dat"))
+            idx_reader = read_test_train(idx_set, data_reader)
+            test_train[parent_name] = idx_reader
+    else:
+        for file_name in os.listdir(parent):
+            current_path = "".join((parent, "/", file_name))
+            if os.path.isdir(current_path):
+                # if we're checking a sub-directory, recall this method
+                scan_folder_gs(current_path, file_name, test_train)

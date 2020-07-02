@@ -1,8 +1,0 @@
-n_entradas= 9
-n_clases= 6
-n_arquivos= 1
-fich1= breast-tissue_R.dat
-n_patrons1= 106
-n_patrons_entrena= 53
-n_patrons_valida= 53
-n_conxuntos= 1

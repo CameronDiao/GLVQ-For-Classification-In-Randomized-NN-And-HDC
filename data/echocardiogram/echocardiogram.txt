@@ -1,8 +1,0 @@
-n_entradas= 10
-n_clases= 2
-n_arquivos= 1
-fich1= echocardiogram_R.dat
-n_patrons1= 131
-n_patrons_entrena= 66
-n_patrons_valida= 65
-n_conxuntos= 1

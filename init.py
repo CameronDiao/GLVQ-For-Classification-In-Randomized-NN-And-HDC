@@ -1,9 +1,14 @@
 import numpy as np
 import scipy as sc
 from numba import njit, vectorize, float64
-import glvq
 import sklearn_lvq
+import rslvq
+import gmlvq
+import glvq
 import math
+#import cProfile
+#import io
+#import pstats
 
 def preprocess(dataset):
     """
@@ -51,8 +56,6 @@ def density_encoding(dataset, n):
             enc_matrix[vec][0:int(x[vec])] = -1
         enc_ds[row] = enc_matrix.T
     return enc_ds
-    # enc_df = dataset.apply(lambda row: de_helper(np.stack(row), n), axis=1)
-    # return enc_df
 
 @vectorize([float64(float64)])
 def sigmoid(elem):
@@ -133,14 +136,10 @@ def readout_matrix(h_matrix, y_matrix, lmb):
     #w_out = np.linalg.lstsq(h_matrix.T @ h_matrix + id_matrix * lmb, h_matrix.T @ y_matrix)[0]
     w_out = sc.linalg.pinv(h_matrix.T @ h_matrix + id_matrix * lmb) @ h_matrix.T @ y_matrix
     return w_out
-    #inner = np.add(x.T @ x, id_matrix * lmb)
-    #w_out = np.linalg.pinv(inner) @ x.T @ y_matrix
-    #w_out = np.linalg.lstsq(x.T @ x + id_matrix * lmb, x.T @ y_matrix, rcond=None)[0]
-    #return w_out
 
-def readout_matrix_lvq(h_matrix, y_matrix):
+def readout_matrix_lvq(h_matrix, y_matrix, ppc, beta):
     """
-    Fit an LVQ classifier model from h_matrix and y_matrix
+    Fit a GLVQ classifier model from h_matrix and y_matrix
     :param h_matrix: a DataFrame object of dimension M x N containing the hidden layer activation values
     of every data sample
     Alternatively, a DataFrame object of dimension M x K containing the normalized feature values
@@ -150,6 +149,13 @@ def readout_matrix_lvq(h_matrix, y_matrix):
     """
     #h_matrix = h_matrix.astype(dtype=np.float32)
     #y_matrix = y_matrix.astype(dtype=np.float32)
-    w_out = glvq.GlvqModel(prototypes_per_class=3, beta=13)
+    w_out = glvq.GlvqModel(prototypes_per_class=ppc, beta=beta)
+    #pr = cProfile.Profile()
+    #pr.enable()
     w_out.fit(h_matrix, y_matrix)
+    #pr.disable()
+    #s = io.StringIO()
+    #ps = pstats.Stats(pr, stream=s).sort_stats('cumulative')
+    #ps.print_stats()
+    #print(s.getvalue())
     return w_out #w_out.iteracc

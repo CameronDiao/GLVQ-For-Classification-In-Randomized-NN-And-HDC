@@ -1,8 +1,0 @@
-n_entradas= 41
-n_clases= 2
-n_arquivos= 1
-fich1= oocytes_merluccius_nucleus_4d_R.dat
-n_patrons1= 1022
-n_patrons_entrena= 511
-n_patrons_valida= 511
-n_conxuntos= 1

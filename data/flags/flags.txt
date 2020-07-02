@@ -1,8 +1,0 @@
-n_entradas= 28
-n_clases= 8
-n_arquivos= 1
-fich1= flags_R.dat
-n_patrons1= 194
-n_patrons_entrena= 97
-n_patrons_valida= 97
-n_conxuntos= 1

@@ -1,8 +1,0 @@
-n_entradas= 60
-n_clases= 6
-n_arquivos= 1
-fich1= synthetic-control_R.dat
-n_patrons1= 600
-n_patrons_entrena= 300
-n_patrons_valida= 300
-n_conxuntos= 1

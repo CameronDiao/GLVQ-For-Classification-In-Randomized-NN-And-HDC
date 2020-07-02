@@ -1,8 +1,0 @@
-n_entradas= 13
-n_clases= 5
-n_arquivos= 1
-fich1= heart-cleveland_R.dat
-n_patrons1= 303
-n_patrons_entrena= 152
-n_patrons_valida= 151
-n_conxuntos= 1

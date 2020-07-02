@@ -1,8 +1,0 @@
-n_entradas= 11
-n_clases= 7
-n_arquivos= 1
-fich1= wine-quality-white_R.dat
-n_patrons1= 4898
-n_patrons_entrena= 2449
-n_patrons_valida= 2449
-n_conxuntos= 1
