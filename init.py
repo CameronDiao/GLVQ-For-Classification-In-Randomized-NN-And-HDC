@@ -1,10 +1,7 @@
-import numpy as np
 import scipy as sc
+import numpy as np
 from numba import njit, vectorize, float64
 import sklearn_lvq
-import rslvq
-import gmlvq
-import glvq
 import math
 #import cProfile
 #import io
@@ -39,14 +36,14 @@ def quantize(elem, n):
 def density_encoding(dataset, n):
     """
     Applies density-based encoding to feature values of dataset
-    Encoding is performed by representing quantized feature values as the density of -1s in N-dimensional vectors
+    Encoding is performed by representing quantized feature values as the density of N-dimensional bipolar vectors
     :param dataset: a data matrix of dimension M x K containing data samples with their
     respective feature values
-    In this instance, a DataFrame object of shape M x K
+    In this instance, a numpy 2-D array
     :param n: an int value representing the number of neurons in the network's hidden layer
     :return: data_matrix: a matrix of dimension (MN) x K containing data samples with their
     respective encoded feature values
-    In this instance, a Series object of size M containing numpy 2-D arrays of shape N x K
+    In this instance, a numpy 3-D array of size M x N x K
     """
     enc_ds = np.zeros((dataset.shape[0], n, dataset.shape[1]))
     for row in range(dataset.shape[0]):
@@ -65,16 +62,16 @@ def sigmoid(elem):
 def activation_matrix(dataset, w_in, b):
     """
     Constructs the matrix H of hidden layer activation values of every data sample in dataset
-    :param dataset: a DataFrame object of dimension M x K containing data samples with their
+    :param dataset: a data matrix of dimension M x K containing data samples with their
     respective feature values
+    In this instance, a numpy 2-D array
     :param w_in: a random N x K matrix with each element sampled from a uniform distribution [-1, 1]
     In this instance, a numpy 2-D array
     :param b: a random N x 1 vector with each element sampled from a uniform distribution [-0.1, 0.1]
     In this instance, a numpy 2-D array
-    :param g: a nonlinear activation function applied to each neuron
-    In this case, the sigmoid function is used
-    :return: h_matrix: a DataFrame object of dimension M x N containing the hidden layer activation values
+    :return: h_matrix: a data matrix of dimension M x N containing the hidden layer activation values
     of every data sample
+    In this instance, a numpy 2-D array
     """
     #h_matrix = np.zeros((dataset.shape[0], n))
     #for row in range(dataset.shape[0]):
@@ -93,13 +90,13 @@ def enc_activation_matrix(dataset, w_in, kappa):
     Constructs the matrix H of hidden layer activation values from the density-based representation layer
     :param dataset: a data matrix of dimension (MN) x K containing data samples with their
     respective encoded feature values
-    In this instance, a Series object of size M containing numpy 2-D arrays of shape N x K
+    In this instance, a numpy 2-D array of shape M x N x K
     :param w_in: a random N x K matrix with each element randomly chosen from the set {-1, +1}
     In this instance, a numpy 2-D array
     :param kappa: an int value clipping the bounds of computed activation values
     :return: h_matrix: a data matrix of dimension M x N containing the hidden layer activation values
     of every data sample
-    In this instance, a Series object of size M containing numpy 1-D arrays of size N
+    In this instance, a numpy 2-D array
     """
     h_matrix = np.zeros((dataset.shape[0], dataset.shape[1]))
     for row in range(dataset.shape[0]):
@@ -112,23 +109,20 @@ def enc_activation_matrix(dataset, w_in, kappa):
                 h[i] = -kappa
         h_matrix[row] = h
     return h_matrix
-    # h_matrix = dataset.apply(lambda row: enc_am_helper(np.stack(row), w_in, kappa))
-    # return h_matrix
 
 def readout_matrix(h_matrix, y_matrix, lmb):
     """
-    Construct matrix w_out of readout connections between the hidden and output layers of the RVFL network
+    Constructs matrix w_out of readout connections between the hidden and output layers of the RVFL network
     :param h_matrix: a data matrix of dimension M x N containing the hidden layer activation values
     of every data sample
-    In this instance, a numpy 2-D array of shape M x N
+    In this instance, a numpy 2-D array
     :param y_matrix: a data matrix of dimension M x L containing sample classifications using
     one-hot encodings
-    In this instance, a DataFrame object of shape M x L
+    In this instance, a numpy 2-D array
     :param lmb: a float value representing the hyperparameter lambda
-    :param n: an int value representing the number of neurons in the network's hidden layer
     :return: w_out: a data matrix of dimension N x L containing weights of the readout connections
     between the hidden and output layers
-    In this instance, a numpy 2-D array of shape N x L
+    In this instance, a numpy 2-D array
     """
     h_matrix = h_matrix.astype(dtype=np.float32)
     y_matrix = y_matrix.astype(dtype=np.float32)
@@ -140,16 +134,18 @@ def readout_matrix(h_matrix, y_matrix, lmb):
 def readout_matrix_lvq(h_matrix, y_matrix, ppc, beta):
     """
     Fit a GLVQ classifier model from h_matrix and y_matrix
-    :param h_matrix: a DataFrame object of dimension M x N containing the hidden layer activation values
+    :param h_matrix: a data matrix of dimension M x N containing the hidden layer activation values
     of every data sample
-    Alternatively, a DataFrame object of dimension M x K containing the normalized feature values
+    Alternatively, a data matrix of dimension M x K containing the normalized feature values
     of every data sample
-    :param y_matrix: a DataFrame object of dimension M x 1 containing sample classifications
-    :return: w_out: an LVQ Model object
+    In this instance, a numpy 2-D array
+    :param y_matrix: a data matrix of dimension M x 1 containing sample classifications
+    In this instance, a numpy 1-D array
+    :return: w_out: an LvqModel object
     """
     #h_matrix = h_matrix.astype(dtype=np.float32)
     #y_matrix = y_matrix.astype(dtype=np.float32)
-    w_out = glvq.GlvqModel(prototypes_per_class=ppc, beta=beta)
+    w_out = sklearn_lvq.GlvqModel(prototypes_per_class=ppc, beta=beta)
     #pr = cProfile.Profile()
     #pr.enable()
     w_out.fit(h_matrix, y_matrix)

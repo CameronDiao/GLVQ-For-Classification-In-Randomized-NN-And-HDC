@@ -2,9 +2,9 @@ import test_train as tt
 
 def kf_model_accuracy(test_train, lmb, n, kappa, ppc, beta):
     """
-    Computes prediction model accuracy across k folds on the dataset partitioned in test_train
+    Computes model accuracy across k folds on the dataset partitioned in test_train
     :param test_train: a dictionary mapping the label of each study parent_name to its dataset,
-    indexed by the k folds used to perform cross validation on the dataset
+    indexed by the k folds used to perform CV on the dataset
     :param lmb: a float value representing the hyperparameter lambda
     :param n: an int value representing the number of neurons in the network's hidden layer
     :param kappa: an int value representing the threshold parameter
@@ -16,23 +16,22 @@ def kf_model_accuracy(test_train, lmb, n, kappa, ppc, beta):
     # Count number of folds
     num_folds = len(fold_sets)
     sum_acc = 0
-    #iter_acc = {}
     # Calculate model accuracy for individual folds
     for fold in fold_sets:
         # For RVFL networks
         #fold_acc = tt.encoding_model(fold_sets[fold]["Train"], fold_sets[fold]["Test"], lmb, n, kappa)
         # For LVQ networks
-        fold_acc = tt.lvq_model(fold_sets[fold]["Train"], fold_sets[fold]["Test"], n, kappa, ppc, beta) #temp_acc
+        fold_acc = tt.lvq_model(fold_sets[fold]["Train"], fold_sets[fold]["Test"], n, kappa, ppc, beta)
         # For LVQ classifiers
         #fold_acc = tt.direct_lvq_model(fold_sets[fold]["Train"], fold_sets[fold]["Test"], ppc, beta)
         sum_acc += fold_acc
         #iter_acc.update(temp_acc)
     # Return average model accuracy across all folds
-    return sum_acc / num_folds #iter_acc
+    return sum_acc / num_folds
 
 def tt_model_accuracy(test_train, lmb, n, kappa, ppc, beta):
     """
-    Computes prediction model accuracy on the dataset in test_train
+    Computes model accuracy on the dataset in test_train
     :param test_train: a dictionary mapping the label of each study parent_name to its
     training and testing datasets
     :param lmb: a float value representing the hyperparameter lambda
@@ -45,9 +44,9 @@ def tt_model_accuracy(test_train, lmb, n, kappa, ppc, beta):
     test_set = test_train[name]["Test"]
 
     # For RVFL networks
-    # fold_acc = tt.encoding_model(train_set, test_set, lmb, n, kappa)
+    # acc = tt.encoding_model(train_set, test_set, lmb, n, kappa)
     # For LVQ networks
-    acc = tt.lvq_model(train_set, test_set, n, kappa, ppc, beta)  # iter_acc
+    acc = tt.lvq_model(train_set, test_set, n, kappa, ppc, beta)
     # For LVQ classifiers
-    # fold_acc = tt.direct_lvq_model(train_set, test_set, ppc, beta)
-    return acc #iter_acc
+    # acc = tt.direct_lvq_model(train_set, test_set, ppc, beta)
+    return acc

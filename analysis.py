@@ -1,8 +1,8 @@
+import time
+import scipy.io as sc
+import numpy as np
 import load_data as ld
 import model_accuracy as ma
-import numpy as np
-import scipy.io as sc
-import time
 
 # Instantiate empty test_train and k_fold dictionaries
 test_train = {}
@@ -14,14 +14,14 @@ ld.scan_folder("/Users/camerondiao/Documents/HDResearch/DataManip/data", "data",
 simul=5 # number of runs for random parameter initialization
 #elm_opt_param=sc.loadmat('/Users/camerondiao/Documents/HDResearch/DataManip/i_elm_opt_param.mat') #initial feature set
 #elm_opt_param=(elm_opt_param['i_elm_opt_param'])
-elm_opt_param = np.genfromtxt('mid_param.csv', delimiter='\t')
+elm_opt_param = np.genfromtxt('final_param.csv', delimiter='\t')
 
 # Gather accuracies for each dataset
 tt_data = list(test_train.keys())
 kf_data = list(k_fold.keys())
 total_data = sorted(tt_data + kf_data)
 
-accuracy_all = [[] for i in range(len(total_data))]  # will store accuracies for individual datasets
+accuracy_all = [[] for i in range(len(total_data))]  # store accuracies for individual datasets
 
 start_time = time.time()
 
@@ -43,7 +43,6 @@ for sim in range(simul):  # for simul initializations
             temp[key]["Train"] = test_train.get(key)["Train"]
             temp[key]["Test"] = test_train.get(key)["Test"]
 
-            # accuracy_all[i]=tt.model_accuracy(temp, lmb, n)[0]
             accuracy_all[i].append(ma.tt_model_accuracy(temp, n, lmb, kappa, ppc, beta))
         else:  # if dataset is in kf_data
             temp = {}
@@ -66,7 +65,6 @@ for sim in range(simul):  # for simul initializations
             temp[key][key2]["Test"] = k_fold.get(key)[key2]["Test"]
 
             # Recreate dictionary structure with only the current dataset
-            # accuracy_all[i]=kf.model_accuracy(temp, lmb, n)[0]
             accuracy_all[i].append(ma.kf_model_accuracy(temp, n, lmb, kappa, ppc, beta))
 
 # Accuracy mean

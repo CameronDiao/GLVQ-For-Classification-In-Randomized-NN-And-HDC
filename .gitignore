@@ -83,3 +83,7 @@ __pycache__/
 ######################
 
 data/
+
+optparam/
+
+build/
