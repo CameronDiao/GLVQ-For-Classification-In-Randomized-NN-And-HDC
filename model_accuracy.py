@@ -21,9 +21,9 @@ def kf_model_accuracy(test_train, lmb, n, kappa, ppc, beta):
         # For RVFL networks
         #fold_acc = tt.encoding_model(fold_sets[fold]["Train"], fold_sets[fold]["Test"], lmb, n, kappa)
         # For LVQ networks
-        fold_acc = tt.lvq_model(fold_sets[fold]["Train"], fold_sets[fold]["Test"], n, kappa, ppc, beta)
+        #fold_acc = tt.lvq_model(fold_sets[fold]["Train"], fold_sets[fold]["Test"], n, kappa, ppc, beta)
         # For LVQ classifiers
-        #fold_acc = tt.direct_lvq_model(fold_sets[fold]["Train"], fold_sets[fold]["Test"], ppc, beta)
+        fold_acc = tt.direct_lvq_model(fold_sets[fold]["Train"], fold_sets[fold]["Test"], ppc, beta)
         sum_acc += fold_acc
         #iter_acc.update(temp_acc)
     # Return average model accuracy across all folds
@@ -44,9 +44,9 @@ def tt_model_accuracy(test_train, lmb, n, kappa, ppc, beta):
     test_set = test_train[name]["Test"]
 
     # For RVFL networks
-    # acc = tt.encoding_model(train_set, test_set, lmb, n, kappa)
+    #acc = tt.encoding_model(train_set, test_set, lmb, n, kappa)
     # For LVQ networks
-    acc = tt.lvq_model(train_set, test_set, n, kappa, ppc, beta)
+    #acc = tt.lvq_model(train_set, test_set, n, kappa, ppc, beta)
     # For LVQ classifiers
-    # acc = tt.direct_lvq_model(train_set, test_set, ppc, beta)
+    acc = tt.direct_lvq_model(train_set, test_set, ppc, beta)
     return acc

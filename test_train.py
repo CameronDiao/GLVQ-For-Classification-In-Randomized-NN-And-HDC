@@ -63,7 +63,7 @@ def lvq_model(train_set, test_set, n, kappa, ppc, beta):
     """
     # Set parameters
     k = len(train_set.columns) - 1
-    w_in = np.random.uniform(-1, 1, size=(n, k)).astype(dtype="float64")
+    w_in = np.random.choice([-1, 1], size=(n, k)).astype(dtype="float64")
 
     # Compute density-based representation layer
     train_features = train_set.drop(["clase"], axis=1)

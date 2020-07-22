@@ -1,7 +1,7 @@
 import scipy as sc
 import numpy as np
 from numba import njit, vectorize, float64
-import sklearn_lvq
+import kglvq
 import math
 #import cProfile
 #import io
@@ -43,7 +43,7 @@ def density_encoding(dataset, n):
     :param n: an int value representing the number of neurons in the network's hidden layer
     :return: data_matrix: a matrix of dimension (MN) x K containing data samples with their
     respective encoded feature values
-    In this instance, a numpy 3-D array of size M x N x K
+    In this instance, a numpy 3-D array of shape M x N x K
     """
     enc_ds = np.zeros((dataset.shape[0], n, dataset.shape[1]))
     for row in range(dataset.shape[0]):
@@ -133,7 +133,7 @@ def readout_matrix(h_matrix, y_matrix, lmb):
 
 def readout_matrix_lvq(h_matrix, y_matrix, ppc, beta):
     """
-    Fit a GLVQ classifier model from h_matrix and y_matrix
+    Fit a KGLVQ classifier model from h_matrix and y_matrix
     :param h_matrix: a data matrix of dimension M x N containing the hidden layer activation values
     of every data sample
     Alternatively, a data matrix of dimension M x K containing the normalized feature values
@@ -145,13 +145,6 @@ def readout_matrix_lvq(h_matrix, y_matrix, ppc, beta):
     """
     #h_matrix = h_matrix.astype(dtype=np.float32)
     #y_matrix = y_matrix.astype(dtype=np.float32)
-    w_out = sklearn_lvq.GlvqModel(prototypes_per_class=ppc, beta=beta)
-    #pr = cProfile.Profile()
-    #pr.enable()
+    w_out = kglvq.KglvqModel()
     w_out.fit(h_matrix, y_matrix)
-    #pr.disable()
-    #s = io.StringIO()
-    #ps = pstats.Stats(pr, stream=s).sort_stats('cumulative')
-    #ps.print_stats()
-    #print(s.getvalue())
-    return w_out #w_out.iteracc
+    return w_out

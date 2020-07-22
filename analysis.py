@@ -11,7 +11,7 @@ k_fold = {}
 ld.scan_folder("/Users/camerondiao/Documents/HDResearch/DataManip/data", "data", test_train, k_fold)
 
 # load optimal hyperparameters
-simul=5 # number of runs for random parameter initialization
+simul=3 # number of runs for random parameter initialization
 #elm_opt_param=sc.loadmat('/Users/camerondiao/Documents/HDResearch/DataManip/i_elm_opt_param.mat') #initial feature set
 #elm_opt_param=(elm_opt_param['i_elm_opt_param'])
 elm_opt_param = np.genfromtxt('final_param.csv', delimiter='\t')
@@ -26,7 +26,7 @@ accuracy_all = [[] for i in range(len(total_data))]  # store accuracies for indi
 start_time = time.time()
 
 for sim in range(simul):  # for simul initializations
-    for i in range(len(total_data)):
+    for i in range(3, len(total_data)):
         n = int(elm_opt_param[i, 0])
         lmb = elm_opt_param[i, 1]
         kappa = int(elm_opt_param[i, 2])
@@ -43,7 +43,7 @@ for sim in range(simul):  # for simul initializations
             temp[key]["Train"] = test_train.get(key)["Train"]
             temp[key]["Test"] = test_train.get(key)["Test"]
 
-            accuracy_all[i].append(ma.tt_model_accuracy(temp, n, lmb, kappa, ppc, beta))
+            accuracy_all[i].append(ma.tt_model_accuracy(temp, lmb, n, kappa, ppc, beta))
         else:  # if dataset is in kf_data
             temp = {}
             temp[key] = {}
@@ -65,7 +65,7 @@ for sim in range(simul):  # for simul initializations
             temp[key][key2]["Test"] = k_fold.get(key)[key2]["Test"]
 
             # Recreate dictionary structure with only the current dataset
-            accuracy_all[i].append(ma.kf_model_accuracy(temp, n, lmb, kappa, ppc, beta))
+            accuracy_all[i].append(ma.kf_model_accuracy(temp, lmb, n, kappa, ppc, beta))
 
 # Accuracy mean
 accuracy_all_s = [sum(elm) / simul for elm in accuracy_all]  # mean values for each dataset accross simulations
