@@ -1,5 +1,5 @@
 from models.IntRVFL.base import IntRVFL
-from classifiers.lvq1 import lvq1
+from classifiers import lvq1
 
 class IntRVFLUsingLVQ1(IntRVFL):
     def __init__(self, train_set, classifier, n, kappa, ppc, beta=None, sigma=None):

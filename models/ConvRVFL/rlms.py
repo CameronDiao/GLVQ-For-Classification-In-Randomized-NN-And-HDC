@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 from models.ConvRVFL.base import ConvRVFL
-from classifiers.rlms import rlms
+from classifiers import rlms
 
 class ConvRVFLUsingRLMS(ConvRVFL):
     def __init__(self, train_set, n, lmb):

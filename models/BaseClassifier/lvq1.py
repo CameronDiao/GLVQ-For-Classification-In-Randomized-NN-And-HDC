@@ -1,5 +1,5 @@
 from models.BaseClassifier.base import BaseClassifier
-from classifiers.lvq1 import lvq1
+from classifiers import lvq1
 
 class LVQClassifier1(BaseClassifier):
     def __init__(self, train_set, classifier, ppc, beta=None, sigma=None):

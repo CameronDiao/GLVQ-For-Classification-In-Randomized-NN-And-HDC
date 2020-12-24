@@ -1,7 +1,7 @@
 import torch
 
 from models.ConvRVFL.base import ConvRVFL
-from classifiers.lvq2 import lvq2
+from classifiers import lvq2
 
 class ConvRVFLUsingLVQ2(ConvRVFL):
     def __init__(self, train_set, classifier, optimizer, n, ppc, beta, sigma=None):

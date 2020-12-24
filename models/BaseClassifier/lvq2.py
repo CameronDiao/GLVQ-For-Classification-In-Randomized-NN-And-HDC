@@ -1,7 +1,7 @@
 import torch
 
 from models.BaseClassifier.base import BaseClassifier
-from classifiers.lvq2 import lvq2
+from classifiers import lvq2
 
 class LVQClassifier2(BaseClassifier):
     def __init__(self, train_set, classifier, optimizer, ppc, beta, sigma=None):

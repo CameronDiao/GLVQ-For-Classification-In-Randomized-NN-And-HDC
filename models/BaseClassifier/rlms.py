@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 from models.BaseClassifier.base import BaseClassifier
-from classifiers.rlms import rlms
+from classifiers import rlms
 
 class RLMSClassifier(BaseClassifier):
     def __init__(self, train_set, lmb):

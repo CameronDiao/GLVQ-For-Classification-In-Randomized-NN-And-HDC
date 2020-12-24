@@ -1,1 +1,3 @@
-from classifiers import rlms, lvq1, lvq2
+from .rlms import rlms
+from .lvq1 import lvq1
+from .lvq2 import lvq2

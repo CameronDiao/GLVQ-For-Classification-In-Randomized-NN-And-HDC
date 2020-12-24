@@ -22,12 +22,9 @@ def main(hparams):
     total_data = sorted(tt_data + kf_data)
 
     accuracy_all = [[] for _ in range(len(total_data))]  # store accuracies for individual datasets
-    blocks = [3, 19, 24, 51, 58, 67, 76, 101]
 
     for sim in range(simul):  # for simul initializations
         for i in range(len(total_data)):
-            if i in blocks:
-                continue
             optparams = elm_opt_param.iloc[i].to_dict()
 
             print(sim, i)
@@ -64,9 +61,6 @@ def main(hparams):
                                                    hparams.optimizer, **optparams))
 
     accuracy_all_s = [sum(elm) / simul for elm in accuracy_all]  # mean values for each dataset accross simulations
-    for i in range(len(accuracy_all_s)):
-        if i in blocks:
-            accuracy_all_s[i] = None
     np.savetxt(os.getcwd() + '/accuracies.csv', accuracy_all_s, delimiter='\t')
 
     accuracy_all_mean = sum(accuracy_all_s) / (len(accuracy_all_s) - 8)  # mean accuracy among all datasets
@@ -86,8 +80,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='GLVQ-RVFL')
     parser.add_argument('--model', action='store', choices=['f', 'c', 'i'], required=True )
     parser.add_argument('--classifier', action='store', required=True)
-    parser.add_argument('--optimizer', action='store')
+    parser.add_argument('--optimizer', action='store', choices=['lbfgs', 'sgd'])
     parser.add_argument('--data_dir', default='/data')
-    parser.add_argument('--param_dir', default='/parameters/kglvq_param.csv')
+    parser.add_argument('--param_dir', default='/parameters/int_lvq_param.csv')
     args = parser.parse_args()
     main(args)

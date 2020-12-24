@@ -1,5 +1,5 @@
 from models.ConvRVFL.base import ConvRVFL
-from classifiers.lvq1 import lvq1
+from classifiers import lvq1
 
 class ConvRVFLUsingLVQ1(ConvRVFL):
     def __init__(self, train_set, classifier, n, ppc, beta=None, sigma=None):

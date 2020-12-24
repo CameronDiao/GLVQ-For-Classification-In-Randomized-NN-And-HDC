@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 from models.IntRVFL.base import IntRVFL
-from classifiers.rlms import rlms
+from classifiers import rlms
 
 class IntRVFLUsingRLMS(IntRVFL):
     def __init__(self, train_set, n, kappa, lmb):
