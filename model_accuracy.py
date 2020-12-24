@@ -1,6 +1,10 @@
-import test_train as tt
+import re
 
-def kf_model_accuracy(test_train, lmb, n, kappa, ppc, beta, sigma):
+from models.BaseClassifier import RLMSClassifier, LVQClassifier1, LVQClassifier2
+from models.ConvRVFL import ConvRVFLUsingRLMS, ConvRVFLUsingLVQ1, ConvRVFLUsingLVQ2
+from models.IntRVFL import IntRVFLUsingRLMS, IntRVFLUsingLVQ1, IntRVFLUsingLVQ2
+
+def cv_accuracy(test_train, **kwargs):
     """
     Computes model accuracy across k folds on the dataset partitioned in test_train
     :param test_train: a dictionary mapping the label of each study parent_name to its dataset,
@@ -10,38 +14,69 @@ def kf_model_accuracy(test_train, lmb, n, kappa, ppc, beta, sigma):
     :param kappa: an int value representing the threshold parameter
     :return: acc_list: a list of model accuracies for every study in test_train
     """
-    # Isolate dataset
     name = list(test_train.keys())[0]
     fold_sets = test_train[name]
-    # Count number of folds
-    num_folds = len(fold_sets)
     sum_acc = 0
-    # Calculate model accuracy for individual folds
-    for fold in fold_sets:
-        # For LMS classification
-        #fold_acc = tt.lms_class(fold_sets[fold]["Train"], fold_sets[fold]["Test"], lmb)
-        # For LVQ classification
-        #fold_acc = tt.lvq_class(fold_sets[fold]["Train"], fold_sets[fold]["Test"], ppc, beta)
-        # For conventional RVFL networks
-        #fold_acc = tt.conv_lms(fold_sets[fold]["Train"], fold_sets[fold]["Test"], lmb, n)
-        # For conventional RVFLs with GLVQs
-        #fold_acc = tt.conv_lvq(fold_sets[fold]["Train"], fold_sets[fold]["Test"], n, ppc, beta)
-        # For intRVFL networks
-        #fold_acc = tt.encoding_model(fold_sets[fold]["Train"], fold_sets[fold]["Test"], lmb, n, kappa)
-        # For LVQ networks using LBFGS
-        #fold_acc = tt.lvq_model(fold_sets[fold]["Train"], fold_sets[fold]["Test"], n, kappa, ppc, beta)
-        # For LVQ networks using SGD
-        #fold_acc = tt.lvq_model2(fold_sets[fold]["Train"], fold_sets[fold]["Test"], n, kappa, ppc, beta)
-        # For GLVQ classifiers
-        #fold_acc = tt.direct_lvq_model(fold_sets[fold]["Train"], fold_sets[fold]["Test"], ppc, beta)
-        # For KGLVQ classifiers
-        fold_acc = tt.direct_lvq_model2(fold_sets[fold]["Train"], fold_sets[fold]["Test"], ppc, beta, sigma)
-        sum_acc += fold_acc
-        #iter_acc.update(temp_acc)
-    # Return average model accuracy across all folds
-    return sum_acc / num_folds
+    if kwargs.get('model') == 'f':
+        if kwargs.get('classifier') == 'rlms':
+            for fold in fold_sets:
+                model = RLMSClassifier(fold_sets[fold]["Train"], kwargs.get('lmb'))
+                sum_acc += model.score(fold_sets[fold]["Test"])
+        elif re.search("^[A-Za-z]+lvq1$", kwargs.get('classifier')):
+            for fold in fold_sets:
+                model = LVQClassifier1(fold_sets[fold]["Train"], kwargs.get('classifier')[:-1], int(kwargs.get('ppc')),
+                                       int(kwargs.get('beta')), kwargs.get('sigma'))
+                sum_acc += model.score(fold_sets[fold]["Test"])
+        elif re.search("^[A-Za-z]+lvq2$", kwargs.get('classifier')):
+            for fold in fold_sets:
+                model = LVQClassifier2(fold_sets[fold]["Train"], kwargs.get('classifier')[:-1], kwargs.get('optimizer'),
+                                       int(kwargs.get('ppc')), int(kwargs.get('beta')), kwargs.get('sigma'))
+                sum_acc += model.score(fold_sets[fold]["Test"])
+        else:
+            raise ValueError("Invalid Classifier Type")
+    elif kwargs.get('model') == 'c':
+        if kwargs.get('classifier') == 'rlms':
+            for fold in fold_sets:
+                model = ConvRVFLUsingRLMS(fold_sets[fold]["Train"], int(kwargs.get('n')), kwargs.get('lmb'))
+                sum_acc += model.score(fold_sets[fold]["Test"])
+        elif re.search("^[A-Za-z]+lvq1$", kwargs.get('classifier')):
+            for fold in fold_sets:
+                model = ConvRVFLUsingLVQ1(fold_sets[fold]["Train"], kwargs.get('classifier')[:-1], int(kwargs.get('n')),
+                                          int(kwargs.get('ppc')), int(kwargs.get('beta')), kwargs.get('sigma'))
+                sum_acc += model.score(fold_sets[fold]["Test"])
+        elif re.search("^[A-Za-z]+lvq2$", kwargs.get('classifier')):
+            for fold in fold_sets:
+                model = ConvRVFLUsingLVQ2(fold_sets[fold]["Train"], kwargs.get('classifier')[:-1], kwargs.get('optimizer'),
+                                          int(kwargs.get('n')), int(kwargs.get('ppc')), int(kwargs.get('beta')),
+                                          kwargs.get('sigma'))
+                sum_acc += model.score(fold_sets[fold]["Test"])
+        else:
+            raise ValueError("Invalid Classifier Type")
+    elif kwargs.get('model') == 'i':
+        if kwargs.get('classifier') == 'rlms':
+            for fold in fold_sets:
+                model = IntRVFLUsingRLMS(fold_sets[fold]["Train"], int(kwargs.get('n')), int(kwargs.get('kappa')),
+                                          kwargs.get('lmb'))
+                sum_acc += model.score(fold_sets[fold]["Test"])
+        elif re.search("^[A-Za-z]+lvq1$", kwargs.get('classifier')):
+            for fold in fold_sets:
+                model = IntRVFLUsingLVQ1(fold_sets[fold]["Train"], kwargs.get('classifier')[:-1], int(kwargs.get('n')),
+                                         int(kwargs.get('kappa')), int(kwargs.get('ppc')), int(kwargs.get('beta')),
+                                         kwargs.get('sigma'))
+                sum_acc += model.score(fold_sets[fold]["Test"])
+        elif re.search("^[A-Za-z]+lvq2$", kwargs.get('classifier')):
+            for fold in fold_sets:
+                model = IntRVFLUsingLVQ2(fold_sets[fold]["Train"], kwargs.get('classifier')[:-1], kwargs.get('optimizer'),
+                                         int(kwargs.get('n')), int(kwargs.get('kappa')), int(kwargs.get('ppc')),
+                                         int(kwargs.get('beta')), kwargs.get('sigma'))
+                sum_acc += model.score(fold_sets[fold]["Test"])
+        else:
+            raise ValueError("Invalid Classifier Type")
+    else:
+        raise ValueError("Invalid Model Type")
+    return sum_acc / len(fold_sets)
 
-def tt_model_accuracy(test_train, lmb, n, kappa, ppc, beta, sigma):
+def tt_accuracy(test_train, **kwargs):
     """
     Computes model accuracy on the dataset in test_train
     :param test_train: a dictionary mapping the label of each study parent_name to its
@@ -55,22 +90,50 @@ def tt_model_accuracy(test_train, lmb, n, kappa, ppc, beta, sigma):
     train_set = test_train[name]["Train"]
     test_set = test_train[name]["Test"]
 
-    # For LMS classification
-    #acc = tt.lms_class(train_set, test_set, lmb)
-    # For LVQ classification
-    #acc = tt.lvq_class(train_set, test_set, ppc, beta)
-    # For conventional RVFL networks
-    #acc = tt.conv_lms(train_set, test_set, lmb, n)
-    # For conventional RVFLs with GLVQs
-    #acc = tt.conv_lvq(train_set, test_set, n, ppc, beta)
-    # For intRVFL networks
-    #acc = tt.encoding_model(train_set, test_set, lmb, n, kappa)
-    # For LVQ networks using LBFGS
-    #acc = tt.lvq_model(train_set, test_set, n, kappa, ppc, beta)
-    # For LVQ network using SGD
-    #acc = tt.lvq_model2(train_set, test_set, n, kappa, ppc, beta)
-    # For GLVQ classifiers
-    #acc = tt.direct_lvq_model(train_set, test_set, ppc, beta)
-    # For KGLVQ classifiers
-    acc = tt.direct_lvq_model2(train_set, test_set, ppc, beta, sigma)
-    return acc
+    if kwargs.get('model') == 'f':
+        if kwargs.get('classifier') == 'rlms':
+            model = RLMSClassifier(train_set, kwargs.get('lmb'))
+            return model.score(test_set)
+        elif re.search("^[A-Za-z]+lvq1$", kwargs.get('classifier')):
+            model = LVQClassifier1(train_set, kwargs.get('classifier')[:-1], int(kwargs.get('ppc')),
+                                   int(kwargs.get('beta')), kwargs.get('sigma'))
+            return model.score(test_set)
+        elif re.search("^[A-Za-z]+lvq2$", kwargs.get('classifier')):
+            model = LVQClassifier2(train_set, kwargs.get('classifier')[:-1], kwargs.get('optimizer'),
+                                   int(kwargs.get('ppc')), int(kwargs.get('beta')), kwargs.get('sigma'))
+            return model.score(test_set)
+        else:
+            raise ValueError("Invalid Classifier Type")
+    elif kwargs.get('model') == 'c':
+        if kwargs.get('classifier') == 'rlms':
+            model = ConvRVFLUsingRLMS(train_set, kwargs.get('n'), kwargs.get('lmb'))
+            return model.score(test_set)
+        elif re.search("^[A-Za-z]+lvq1$", kwargs.get('classifier')):
+            model = ConvRVFLUsingLVQ1(train_set, kwargs.get('classifier')[:-1], int(kwargs.get('n')),
+                                      int(kwargs.get('ppc')), int(kwargs.get('beta')), kwargs.get('sigma'))
+            return model.score(test_set)
+        elif re.search("^[A-Za-z]+lvq2$", kwargs.get('classifier')):
+            model = ConvRVFLUsingLVQ2(train_set, kwargs.get('classifier')[:-1], kwargs.get('optimizer'),
+                                      int(kwargs.get('n')), int(kwargs.get('ppc')), int(kwargs.get('beta')),
+                                      kwargs.get('sigma'))
+            return model.score(test_set)
+        else:
+            raise ValueError("Invalid Classifier Type")
+    elif kwargs.get('model') == 'i':
+        if kwargs.get('classifier') == 'rlms':
+            model = IntRVFLUsingRLMS(train_set, int(kwargs.get('n')), int(kwargs.get('kappa')), kwargs.get('lmb'))
+            return model.score(test_set)
+        elif re.search("^[A-Za-z]+lvq1$", kwargs.get('classifier')):
+            model = IntRVFLUsingLVQ1(train_set, kwargs.get('classifier')[:-1], int(kwargs.get('n')),
+                                     int(kwargs.get('kappa')), int(kwargs.get('ppc')), int(kwargs.get('beta')),
+                                     kwargs.get('sigma'))
+            return model.score(test_set)
+        elif re.search("^[A-Za-z]+lvq2$", kwargs.get('classifier')):
+            model = IntRVFLUsingLVQ2(train_set, kwargs.get('classifier')[:-1], kwargs.get('optimizer'),
+                                     int(kwargs.get('n')), int(kwargs.get('kappa')), int(kwargs.get('ppc')),
+                                     int(kwargs.get('beta')), kwargs.get('sigma'))
+            return model.score(test_set)
+        else:
+            raise ValueError("Invalid Classifier Type")
+    else:
+        raise ValueError("Invalid Model Type")

@@ -4,7 +4,7 @@ import warnings
 
 import torch
 
-from initializers import get_initializer
+from classifiers.pytorch.initializers import get_initializer
 
 
 class Prototypes1D(torch.nn.Module):

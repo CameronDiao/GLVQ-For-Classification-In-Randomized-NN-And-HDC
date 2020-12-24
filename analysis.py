@@ -1,93 +1,93 @@
-import time
 import scipy.io as sc
 import numpy as np
-import load_data as ld
-import model_accuracy as ma
+import pandas as pd
+import os
+import argparse
 
-# Instantiate empty test_train and k_fold dictionaries
-test_train = {}
-k_fold = {}
-# Load test_train and k_fold with their respective datasets
-ld.scan_folder("/Users/camerondiao/Documents/HDResearch/DataManip/data", "data", test_train, k_fold)
+from model_accuracy import cv_accuracy, tt_accuracy
+from preprocess import scan_folder
 
-# load optimal hyperparameters
-simul=5 # number of runs for random parameter initialization
-#elm_opt_param=sc.loadmat('/Users/camerondiao/Documents/HDResearch/DataManip/i_elm_opt_param.mat') #initial feature set
-#elm_opt_param=(elm_opt_param['i_elm_opt_param'])
-elm_opt_param = np.genfromtxt('int_lvq_param.csv', delimiter='\t')
+def main(hparams):
+    test_train = {}
+    k_fold = {}
+    scan_folder(os.getcwd() + hparams.data_dir, "data", test_train, k_fold)
 
-# Gather accuracies for each dataset
-tt_data = list(test_train.keys())
-kf_data = list(k_fold.keys())
-total_data = sorted(tt_data + kf_data)
+    simul=5 # number of runs for random parameter initialization
+    #elm_opt_param=sc.loadmat('/Users/camerondiao/Documents/HDResearch/DataManip/i_elm_opt_param.mat') #initial feature set
+    #elm_opt_param=(elm_opt_param['i_elm_opt_param'])
+    elm_opt_param = pd.read_csv(os.getcwd() + hparams.param_dir, delimiter='\t')
 
-accuracy_all = [[] for i in range(len(total_data))]  # store accuracies for individual datasets
+    tt_data = list(test_train.keys())
+    kf_data = list(k_fold.keys())
+    total_data = sorted(tt_data + kf_data)
 
-start_time = time.time()
+    accuracy_all = [[] for _ in range(len(total_data))]  # store accuracies for individual datasets
+    blocks = [3, 19, 24, 51, 58, 67, 76, 101]
 
-for sim in range(simul):  # for simul initializations
-    for i in range(len(total_data)):
-        n = int(elm_opt_param[i, 0])
-        #lmb = elm_opt_param[i, 1]
-        kappa = int(elm_opt_param[i, 1])
+    for sim in range(simul):  # for simul initializations
+        for i in range(len(total_data)):
+            if i in blocks:
+                continue
+            optparams = elm_opt_param.iloc[i].to_dict()
 
-        ppc = int(elm_opt_param[i, 2])
-        beta = int(elm_opt_param[i, 3])
-        #beta = int(elm_opt_param[i, 4])
-        #sigma = int(elm_opt_param[i, 5])
+            print(sim, i)
+            key=total_data[i]
+            if key in tt_data:  # if dataset is in tt_data
+                temp = {}
+                temp[key] = {}
+                temp[key]["Train"] = test_train.get(key)["Train"]
+                temp[key]["Test"] = test_train.get(key)["Test"]
 
-        print(sim, i)
-        key=total_data[i]
-        if key in tt_data:  # if dataset is in tt_data
-            # Recreate dictionary structure with only the current dataset
-            temp = {}
-            temp[key] = {}
-            temp[key]["Train"] = test_train.get(key)["Train"]
-            temp[key]["Test"] = test_train.get(key)["Test"]
+                accuracy_all[i].append(tt_accuracy(temp, model=hparams.model, classifier=hparams.classifier, optimizer=
+                                                   hparams.optimizer, **optparams))
+            else:  # if dataset is in kf_data
+                temp = {}
+                temp[key] = {}
+                key2 = 1.0
+                temp[key][key2] = {}
+                temp[key][key2]["Train"] = k_fold.get(key)[key2]["Train"]
+                temp[key][key2]["Test"] = k_fold.get(key)[key2]["Test"]
+                key2 = 2.0
+                temp[key][key2] = {}
+                temp[key][key2]["Train"] = k_fold.get(key)[key2]["Train"]
+                temp[key][key2]["Test"] = k_fold.get(key)[key2]["Test"]
+                key2 = 3.0
+                temp[key][key2] = {}
+                temp[key][key2]["Train"] = k_fold.get(key)[key2]["Train"]
+                temp[key][key2]["Test"] = k_fold.get(key)[key2]["Test"]
+                key2 = 4.0
+                temp[key][key2] = {}
+                temp[key][key2]["Train"] = k_fold.get(key)[key2]["Train"]
+                temp[key][key2]["Test"] = k_fold.get(key)[key2]["Test"]
 
-            accuracy_all[i].append(ma.tt_model_accuracy(temp, None, n, kappa, ppc, beta, None))
-            #accuracy_all[i].append(ma.tt_model_accuracy(temp, lmb, n, kappa, ppc, beta, sigma))
-        else:  # if dataset is in kf_data
-            temp = {}
-            temp[key] = {}
-            key2 = 1.0
-            temp[key][key2] = {}
-            temp[key][key2]["Train"] = k_fold.get(key)[key2]["Train"]
-            temp[key][key2]["Test"] = k_fold.get(key)[key2]["Test"]
-            key2 = 2.0
-            temp[key][key2] = {}
-            temp[key][key2]["Train"] = k_fold.get(key)[key2]["Train"]
-            temp[key][key2]["Test"] = k_fold.get(key)[key2]["Test"]
-            key2 = 3.0
-            temp[key][key2] = {}
-            temp[key][key2]["Train"] = k_fold.get(key)[key2]["Train"]
-            temp[key][key2]["Test"] = k_fold.get(key)[key2]["Test"]
-            key2 = 4.0
-            temp[key][key2] = {}
-            temp[key][key2]["Train"] = k_fold.get(key)[key2]["Train"]
-            temp[key][key2]["Test"] = k_fold.get(key)[key2]["Test"]
+                accuracy_all[i].append(cv_accuracy(temp, model=hparams.model, classifier=hparams.classifier, optimizer=
+                                                   hparams.optimizer, **optparams))
 
-            # Recreate dictionary structure with only the current dataset
-            accuracy_all[i].append(ma.kf_model_accuracy(temp, None, n, kappa, ppc, beta, None))
-            #accuracy_all[i].append(ma.kf_model_accuracy(temp, lmb, n, kappa, ppc, beta, sigma))
+    accuracy_all_s = [sum(elm) / simul for elm in accuracy_all]  # mean values for each dataset accross simulations
+    for i in range(len(accuracy_all_s)):
+        if i in blocks:
+            accuracy_all_s[i] = None
+    np.savetxt(os.getcwd() + '/accuracies.csv', accuracy_all_s, delimiter='\t')
 
+    accuracy_all_mean = sum(accuracy_all_s) / (len(accuracy_all_s) - 8)  # mean accuracy among all datasets
+    print(accuracy_all_mean)
 
-# Accuracy mean
-accuracy_all_s = [sum(elm) / simul for elm in accuracy_all]  # mean values for each dataset accross simulations
-np.savetxt('int_lvq_acc.csv', accuracy_all_s, delimiter='\t')
+    # f = open("output.txt", "w")
+    # f.write("Datasets Accuracies:\n")
+    # for i in range(len(accuracy_all)):
+    #     f.write(total_data[i] + " " + str(accuracy_all[i]) + "\n")
+    #
+    # f.write("\n")
+    # f.write("Average Test/Train Model Accuracy:\n")
+    # f.write(str(accuracy_all_mean))
+    # f.close()
 
-accuracy_all_mean = sum(accuracy_all_s) / len(accuracy_all_s)  # mean accuracy among all datasets
-print(accuracy_all_mean)
-
-print("--- %s seconds ---" % (time.time() - start_time))
-
-# Output results
-f = open("output.txt", "w")
-f.write("Datasets Accuracies:\n")
-for i in range(len(accuracy_all)):
-    f.write(total_data[i] + " " + str(accuracy_all[i]) + "\n")
-
-f.write("\n")
-f.write("Average Test/Train Model Accuracy:\n")
-f.write(str(accuracy_all_mean))
-f.close()
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='GLVQ-RVFL')
+    parser.add_argument('--model', action='store', choices=['f', 'c', 'i'], required=True )
+    parser.add_argument('--classifier', action='store', required=True)
+    parser.add_argument('--optimizer', action='store')
+    parser.add_argument('--data_dir', default='/data')
+    parser.add_argument('--param_dir', default='/parameters/kglvq_param.csv')
+    args = parser.parse_args()
+    main(args)

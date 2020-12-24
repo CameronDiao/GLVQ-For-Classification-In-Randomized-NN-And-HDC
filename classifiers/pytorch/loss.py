@@ -2,9 +2,8 @@
 
 import torch
 
-from activations import get_activation
-from losses import glvq_loss
-from losses import kglvq_loss
+from classifiers.pytorch.activations import get_activation
+from classifiers.pytorch.losses import glvq_loss, kglvq_loss
 
 
 class GLVQLoss(torch.nn.Module):

@@ -1,82 +1,90 @@
 from sklearn.model_selection import ParameterGrid
 import scipy.io as sc
 import numpy as np
-import load_data as ld
-import model_accuracy as ma
-# Instantiate empty test_train
-test_train = {}
-# Load test_train with datasets
-ld.scan_folder_gs("/Users/camerondiao/Documents/HDResearch/DataManip/data", "data", test_train)
+import pandas as pd
+import os
+import argparse
 
-# load optimal hyperparameters
-simul=5
-#elm_opt_param=sc.loadmat('/Users/camerondiao/Documents/HDResearch/DataManip/i_elm_opt_param.mat') #initial feature set
-#elm_opt_param=(elm_opt_param['i_elm_opt_param'])
-elm_opt_param=np.genfromtxt('int_lvq_param.csv', delimiter='\t')
+from model_accuracy import tt_accuracy
+from preprocess import scan_folder_gs
 
-# Instantiate list of dataset names
-tt_data = sorted(list(test_train.keys()))
+def main(hparams):
+    test_train = {}
+    scan_folder_gs(os.getcwd() + hparams.data_dir, "data", test_train)
 
-# Instantiate ParameterGrid object to perform grid search
-grid = {"sigma": [i for i in np.arange(0.6, 1.2, 0.1)]}
-param_grid = ParameterGrid(grid)
-# Store optimal hyperparameters and corresponding accuracies
-best_grid = []
-accuracy_all = []
+    simul=5
+    #elm_opt_param=sc.loadmat('/Users/camerondiao/Documents/HDResearch/DataManip/i_elm_opt_param.mat') #initial feature set
+    #elm_opt_param=(elm_opt_param['i_elm_opt_param'])
+    elm_opt_param=pd.read_csv(os.getcwd() + hparams.param_dir, delimiter='\t')
 
-breakpts = [3, 19, 24, 51, 58, 67, 76, 101]
+    tt_data = sorted(list(test_train.keys()))
 
-for i in range(102, len(tt_data)): # across all datasets
-    if i in breakpts:
-        break
-    #n = int(elm_opt_param[i, 0])
-    #lmb = elm_opt_param[i, 1]
-    #kappa = int(elm_opt_param[i, 2])
-    ppc = int(elm_opt_param[i, 2])
-    beta = int(elm_opt_param[i, 3])
+    grid = {}
+    if 'n' in hparams.params:
+        grid['n'] = [i for i in range(50, 1550, 50)]
+    if 'lmb' in hparams.params:
+        grid['lmb'] = [2**i for i in range(-10, 6)]
+    if 'kappa' in hparams.params:
+        grid['kappa'] = [1, 3, 7, 15]
+    if 'ppc' in hparams.params:
+        grid['ppc'] = [i for i in range(1, 6)]
+    if 'beta' in hparams.params:
+        grid['beta'] = [i for i in range(2, 16)]
+    if 'sigma' in hparams.params:
+        grid['sigma'] = [i for i in np.arange(0.1, 1.2, 0.1)]
+    param_grid = ParameterGrid(grid)
+    best_grid = []
+    accuracy_all = []
 
-    best_score = 0 # stores best accuracy achieved by hyperparameters
-    best_param = [] # stores optimal hyperparameters of dataset
+    param_types = list(set(grid.keys()) | set(elm_opt_param.columns))
 
-    key = tt_data[i] # dataset name
+    for i in range(len(tt_data)): # across all datasets
+        optparams = elm_opt_param.iloc[i].to_dict()
 
-    for g in param_grid:
-        print(i, round(g['sigma'], 1))
-        ds_accuracy = [] # stores accuracies obtained by a single set of hyperparameters
+        best_score = 0 # stores best accuracy achieved by hyperparameters
+        best_param = [] # stores optimal hyperparameters of dataset
 
-        sigma = g['sigma']
+        key = tt_data[i] # dataset name
 
-        for j in range(simul): # simul tests
-            temp = {}
-            temp[key] = {}
-            temp[key]["Train"] = test_train.get(key)["Train"]
-            temp[key]["Test"] = test_train.get(key)["Test"]
-            ds_accuracy.append(ma.tt_model_accuracy(temp, None, None, None, ppc, beta, sigma))
-            #ds_accuracy.append(ma.tt_model_accuracy(temp, lmb, n, kappa, ppc, beta, sigma))
+        for g in param_grid:
+            print(i, g)
+            ds_accuracy = [] # stores accuracies obtained by a single set of hyperparameters
 
-        accuracy_all_mean = sum(ds_accuracy) / len(ds_accuracy)
-        print(accuracy_all_mean)
+            optparams.update(g)
 
-        # store set of hyperparameters which achieves the highest accuracy so far
-        if accuracy_all_mean > best_score:
-            best_score = accuracy_all_mean
-            best_param = [ppc, beta, round(sigma, 1)]
-            #best_param = [n, lmb, kappa, ppc, beta, sigma]
+            for j in range(simul): # simul tests
+                temp = {}
+                temp[key] = {}
+                temp[key]["Train"] = test_train.get(key)["Train"]
+                temp[key]["Test"] = test_train.get(key)["Test"]
+                ds_accuracy.append(tt_accuracy(temp, model=hparams.model, classifier=hparams.classifier, optimizer=
+                                               hparams.optimizer, **optparams))
 
-    accuracy_all.append(best_score)
-    best_grid.append(best_param)
+            accuracy_all_mean = sum(ds_accuracy) / len(ds_accuracy)
+            print(accuracy_all_mean)
 
-    accuracy_all_ext = np.array(accuracy_all)
-    np.savetxt("s6_11_acc_102.csv", accuracy_all_ext, delimiter='\t')
-    best_grid_ext = np.array(best_grid)
-    np.savetxt("s6_11_param_102.csv", best_grid_ext, delimiter='\t')
+            # store set of hyperparameters which achieves the highest accuracy so far
+            if accuracy_all_mean > best_score:
+                best_score = accuracy_all_mean
+                best_param = [optparams[k] for k in param_types]
 
-print(sum(accuracy_all) / len(accuracy_all)) # mean accuracy among all datasets
+        accuracy_all.append(best_score)
+        best_grid.append(best_param)
 
-# Output accuracies
-#accuracy_all = np.array(accuracy_all)
-#np.savetxt("int_lvq_acc.csv", accuracy_all, delimiter='\t')
-# Output grid results
-#best_grid = np.array(best_grid)
-#np.savetxt("int_lvq_param.csv", best_grid, delimiter="\t")
+    np.savetxt(os.getcwd() + '/accuracies.csv', accuracy_all, delimiter='\t')
+    best_grid = pd.DataFrame(data=best_grid, columns=param_types)
+    best_grid.to_csv(os.getcwd() + '/grid_search.csv', sep='\t', index=False, header=param_types)
+    print(sum(accuracy_all) / len(accuracy_all)) # mean accuracy among all datasets
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='GLVQ-RVFL Parameter Tuning')
+    parser.add_argument('--params', action='store', nargs = '+', choices=['n', 'lmb', 'kappa', 'ppc', 'beta', 'sigma'],
+                        required=True)
+    parser.add_argument('--model', action='store', choices=['f', 'c', 'i'], required=True )
+    parser.add_argument('--classifier', action='store', required=True)
+    parser.add_argument('--optimizer', action='store')
+    parser.add_argument('--data_dir', default='/data')
+    parser.add_argument('--param_dir', default='/parameters/f_lms_param.csv')
+    args = parser.parse_args()
+    main(args)
 

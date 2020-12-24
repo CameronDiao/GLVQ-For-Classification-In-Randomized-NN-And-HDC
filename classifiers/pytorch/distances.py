@@ -10,16 +10,6 @@ def kernel_distance(k1, k2, k3, x, y):
                             torch.sum(torch.ger(y[i, :], y[i, :]) * k3).expand(x.shape[0])
     return dist_matrix.T
 
-def nystroem_kernel_distance(k, q, n, x, y):
-    dist_matrix = torch.zeros((y.shape[0], x.shape[0]))
-    # for rbf kernels
-    k_diag = torch.ones(x.shape[0])
-    t = torch.matmul(torch.matmul(torch.matmul(y, n), torch.pinverse(q)), n.T)
-    for i in range(y.shape[0]):
-        dist_matrix[i, :] = k_diag - 2 * torch.sum(y[i, :] * k, dim=1) + \
-                            torch.matmul(y[i, :], t[i, :].T).expand(x.shape[0])
-    return dist_matrix.T
-
 def squared_euclidean_distance(x, y):
     """Compute the squared Euclidean distance between :math:`x` and :math:`y`.
 
