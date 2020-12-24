@@ -89,16 +89,13 @@ def scan_folder_gs(parent, parent_name, test_train):
     if len(files_in) > 0:
         test_type = parent_name + "_R.dat"
         if test_type not in files_in:
-            train_set = "".join((parent, "/", parent_name + "_train_R.dat"))
-            test_set = "".join((parent, "/", parent_name + "_test_R.dat"))
-            train_reader = read_set(train_set)
-            train_reader = init.preprocess(train_reader)
+            data_set = "".join((parent, "/", parent_name + "_train_R.dat"))
+            data_reader = read_set(data_set)
+            data_reader = init.preprocess(data_reader)
 
-            test_reader = read_set(test_set)
-            test_reader = init.preprocess(test_reader)
-
-            data_list = {"Train": train_reader, "Test": test_reader}
-            test_train[parent_name] = data_list
+            idx_set = "".join((parent, "/conxuntos.dat"))
+            idx_reader = read_test_train(idx_set, data_reader)
+            test_train[parent_name] = idx_reader
         else:
             data_set = "".join((parent, "/", test_type))
             data_reader = read_set(data_set)

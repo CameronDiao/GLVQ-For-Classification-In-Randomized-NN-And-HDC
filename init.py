@@ -1,11 +1,18 @@
+import math
 import scipy as sc
 import numpy as np
 from numba import njit, vectorize, float64
-import kglvq
-import math
+import sklearn_lvq
 #import cProfile
 #import io
 #import pstats
+
+import torch
+from torch.utils.data import TensorDataset
+from sklearn.metrics.pairwise import rbf_kernel
+from distances import euclidean_distance, kernel_distance, nystroem_kernel_distance
+from loss import GLVQLoss, KGLVQLoss
+from prototypes import Prototypes1D
 
 def preprocess(dataset):
     """
@@ -129,7 +136,7 @@ def readout_matrix(h_matrix, y_matrix, lmb):
     id_matrix = np.diag(np.var(h_matrix, axis=0))
     #w_out = np.linalg.lstsq(h_matrix.T @ h_matrix + id_matrix * lmb, h_matrix.T @ y_matrix)[0]
     w_out = sc.linalg.pinv(h_matrix.T @ h_matrix + id_matrix * lmb) @ h_matrix.T @ y_matrix
-    return w_out
+    return w_out.values
 
 def readout_matrix_lvq(h_matrix, y_matrix, ppc, beta):
     """
@@ -143,8 +150,149 @@ def readout_matrix_lvq(h_matrix, y_matrix, ppc, beta):
     In this instance, a numpy 1-D array
     :return: w_out: an LvqModel object
     """
-    #h_matrix = h_matrix.astype(dtype=np.float32)
-    #y_matrix = y_matrix.astype(dtype=np.float32)
-    w_out = kglvq.KglvqModel()
+    h_matrix = h_matrix.astype(dtype=np.float32)
+    y_matrix = y_matrix.astype(dtype=np.float32)
+    w_out = sklearn_lvq.GlvqModel(prototypes_per_class=ppc, beta=beta)
     w_out.fit(h_matrix, y_matrix)
     return w_out
+
+def readout_matrix_lvq2(h_matrix, y_matrix, ppc, beta):
+    h_matrix = torch.from_numpy(h_matrix).float()
+    y_matrix = torch.from_numpy(y_matrix).float()
+
+    epochs = 200
+
+    model = glvq_module(h_matrix, y_matrix, ppc=ppc)
+
+    optimizer = torch.optim.SGD(model.parameters(), lr = 1.0)
+    criterion = GLVQLoss(squashing="sigmoid_beta", beta = beta)
+
+    full_train(h_matrix, y_matrix, model, epochs, optimizer, criterion)
+    model.load_state_dict(torch.load('/Users/camerondiao/Documents/HDResearch/DataManip/checkpoint.pt'))
+    return model
+
+def readout_matrix_kglvq(h_matrix, y_matrix, ppc, beta, sigma):
+    h_matrix = torch.from_numpy(h_matrix).float()
+    y_matrix = torch.from_numpy(y_matrix).float()
+
+    epochs = 50
+
+    model = kglvq_module(h_matrix, y_matrix, ppc=ppc, sigma=sigma)
+    #model = kglvq_module(h_matrix, y_matrix, ppc=ppc, sigma=sigma)
+
+    optimizer = torch.optim.LBFGS(model.parameters())
+    criterion = KGLVQLoss(squashing='sigmoid_beta', beta=beta)
+
+    full_train(h_matrix, y_matrix, model, epochs, optimizer, criterion)
+    #batch_train(h_matrix, y_matrix, model, epochs, optimizer, criterion)
+    model.load_state_dict(torch.load('/Users/camerondiao/Documents/HDResearch/DataManip/checkpoint.pt'))
+    return model
+
+def glvq_module(x_data, y_data, ppc):
+    class Model(torch.nn.Module):
+        def __init__(self, x_data, y_data, **kwargs):
+            super().__init__()
+            self.p1 = Prototypes1D(input_dim=x_data.shape[1],
+                                   prototypes_per_class=ppc,
+                                   nclasses=torch.unique(y_data).size()[0],
+                                   prototype_initializer='stratified_mean',
+                                   data=[x_data, y_data])
+            self.train_data = x_data
+        def forward(self, x):
+            protos = self.p1.prototypes
+            plabels = self.p1.prototype_labels
+            dis = euclidean_distance(x, protos)
+            return dis, plabels
+
+    return Model(x_data=x_data, y_data=y_data)
+
+def kglvq_module(x_data, y_data, ppc, sigma=None):
+    class Model(torch.nn.Module):
+        def __init__(self, x_data, y_data, **kwargs):
+            super().__init__()
+            self.p1 = Prototypes1D(input_dim=x_data.shape[1],
+                                   prototypes_per_class=ppc,
+                                   nclasses=torch.unique(y_data).size()[0],
+                                   prototype_initializer='kernel_mean',
+                                   data=[x_data, y_data])
+            self.train_data = x_data
+
+        def forward(self, x):
+            protos = self.p1.prototypes
+            plabels = self.p1.prototype_labels
+            dis = kernel_distance(torch.from_numpy(rbf_kernel(x, gamma=sigma)),
+                                  torch.from_numpy(rbf_kernel(x, self.train_data, gamma=sigma)),
+                                  torch.from_numpy(rbf_kernel(self.train_data, gamma=sigma)), x, protos)
+            return dis, plabels
+
+    return Model(x_data=x_data, y_data=y_data)
+
+def akglvq_module(x_data, y_data, ppc, sigma=None):
+    class Model(torch.nn.Module):
+        def __init__(self, x_data, y_data, **kwargs):
+            super().__init__()
+            self.p1 = Prototypes1D(input_dim=x_data.shape[1],
+                                   prototypes_per_class=ppc,
+                                   nclasses=torch.unique(y_data).size()[0],
+                                   prototype_initializer='kernel_mean',
+                                   data=[x_data, y_data])
+            self.train_data = x_data
+            self.train_samples = x_data[torch.randperm(x_data.size(0))[:int(x_data.size(0) / 5)]]
+
+        def forward(self, x):
+            protos = self.p1.prototypes
+            plabels = self.p1.prototype_labels
+
+            q = rbf_kernel(self.train_samples, self.train_samples, gamma=sigma)
+            n = rbf_kernel(self.train_data, self.train_samples, gamma=sigma)
+
+            dis = nystroem_kernel_distance(torch.from_numpy(rbf_kernel(x, self.train_data, gamma=sigma)),
+                                           torch.from_numpy(q),
+                                           torch.from_numpy(n), x, protos)
+            return dis, plabels
+
+    return Model(x_data=x_data, y_data=y_data)
+
+def full_train(x_data, y_data, model, epochs, optimizer, criterion):
+    best_loss = np.inf
+    #past_loss = None
+    #delta = 1e-5
+
+    for epoch in range(epochs):
+        model.train()
+        def closure():
+            optimizer.zero_grad()
+            distances, plabels = model(x_data)
+            loss = criterion([distances, plabels], y_data)
+            #print(f'Epoch: {epoch + 1:03d} Loss: {loss.item():02.02f}')
+            loss.backward()
+            return loss
+
+        optimizer.step(closure)
+
+        model.eval()
+        with torch.no_grad():
+            distances, plabels = model(x_data)
+            loss = criterion([distances, plabels], y_data)
+
+        #if past_loss is None or abs(past_loss - loss) > delta:
+        #    past_loss = loss
+
+        if best_loss > loss:
+            best_loss = loss
+            torch.save(model.state_dict(), 'checkpoint.pt')
+
+def batch_train(x_data, y_data, model, epochs, optimizer, criterion):
+    trainset = TensorDataset(x_data, y_data)
+    trainloader = torch.utils.data.DataLoader(trainset, batch_size=128, num_workers=0,
+                                              shuffle=True)
+
+    for epoch in range(epochs):
+        model.train()
+        for inputs, targets in trainloader:
+            optimizer.zero_grad()
+            distances, plabels = model(inputs)
+            loss = criterion([distances, plabels], targets)
+            print(f'Epoch: {epoch + 1:03d} Loss: {loss.item():02.02f}')
+            loss.backward()
+            optimizer.step()

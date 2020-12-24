@@ -175,4 +175,4 @@ cython_debug/
 # Folders/Files #
 data/
 optparam/
-build/
+sklearn_lvq/
