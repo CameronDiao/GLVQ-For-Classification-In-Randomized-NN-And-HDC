@@ -40,7 +40,7 @@ def main(hparams):
 
     param_types = list(set(grid.keys()) | set(elm_opt_param.columns))
 
-    for i in range(117, len(tt_data)): # across all datasets
+    for i in range(len(tt_data)): # across all datasets
         optparams = elm_opt_param.iloc[i].to_dict()
 
         best_score = 0 # stores best accuracy achieved by hyperparameters
@@ -72,9 +72,9 @@ def main(hparams):
 
         accuracy_all.append(best_score)
         best_grid.append(best_param)
-        np.savetxt(os.getcwd() + '/b11_15_acc_117.csv', accuracy_all, delimiter='\t')
+        np.savetxt(os.getcwd() + '/accuracies.csv', accuracy_all, delimiter='\t')
         save_grid = pd.DataFrame(data=best_grid, columns=param_types)
-        save_grid.to_csv(os.getcwd() + '/b11_15_params_117.csv', sep='\t', index=False, header=param_types)
+        save_grid.to_csv(os.getcwd() + '/params.csv', sep='\t', index=False, header=param_types)
 
 
     #np.savetxt(os.getcwd() + '/accuracies.csv', accuracy_all, delimiter='\t')
@@ -90,7 +90,7 @@ if __name__ == '__main__':
     parser.add_argument('--classifier', action='store', required=True)
     parser.add_argument('--optimizer', action='store')
     parser.add_argument('--data_dir', default='/data')
-    parser.add_argument('--param_dir', default='/parameters/i_elm_opt_param.csv')
+    parser.add_argument('--param_dir', default='/parameters/int_lvq_param.csv')
     args = parser.parse_args()
     main(args)
 
