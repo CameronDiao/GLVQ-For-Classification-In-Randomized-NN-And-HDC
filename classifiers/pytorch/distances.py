@@ -8,7 +8,7 @@ def kernel_distance(k1, k2, k3, x, y):
     for i in range(y.shape[0]):
         dist_matrix[i, :] = k_diag - 2 * torch.sum(y[i, :] * k2, dim=1) + \
                             torch.sum(torch.ger(y[i, :], y[i, :]) * k3).expand(x.shape[0])
-    return dist_matrix.T
+    return torch.t(dist_matrix)
 
 def squared_euclidean_distance(x, y):
     """Compute the squared Euclidean distance between :math:`x` and :math:`y`.

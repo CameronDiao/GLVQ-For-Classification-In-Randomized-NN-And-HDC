@@ -59,13 +59,13 @@ def main(hparams):
 
                 accuracy_all[i].append(cv_accuracy(temp, model=hparams.model, classifier=hparams.classifier, optimizer=
                                                    hparams.optimizer, **optparams))
-
+            print(accuracy_all[i][-1])
     accuracy_all_s = [sum(elm) / simul for elm in accuracy_all]  # mean values for each dataset accross simulations
     np.savetxt(os.getcwd() + '/accuracies.csv', accuracy_all_s, delimiter='\t')
-
-    accuracy_all_mean = sum(accuracy_all_s) / (len(accuracy_all_s) - 8)  # mean accuracy among all datasets
+    #
+    accuracy_all_mean = sum(accuracy_all_s) / len(accuracy_all_s)  # mean accuracy among all datasets
     print(accuracy_all_mean)
-
+    #
     # f = open("output.txt", "w")
     # f.write("Datasets Accuracies:\n")
     # for i in range(len(accuracy_all)):
@@ -80,7 +80,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='GLVQ-RVFL')
     parser.add_argument('--model', action='store', choices=['f', 'c', 'i'], required=True )
     parser.add_argument('--classifier', action='store', required=True)
-    parser.add_argument('--optimizer', action='store', choices=['lbfgs', 'sgd'])
+    parser.add_argument('--optimizer', action='store', choices=['lbfgs', 'sgd', 'adam'])
     parser.add_argument('--data_dir', default='/data')
     parser.add_argument('--param_dir', default='/parameters/int_lvq_param.csv')
     args = parser.parse_args()

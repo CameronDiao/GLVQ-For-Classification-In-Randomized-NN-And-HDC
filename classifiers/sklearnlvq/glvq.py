@@ -7,7 +7,6 @@
 from __future__ import division
 
 import numpy as np
-import numexpr as ne
 from scipy.optimize import minimize
 from scipy.spatial.distance import cdist
 
@@ -20,13 +19,11 @@ from sklearn_lvq.lvq import _LvqBaseModel
 
 def _squared_euclidean(a, b=None):
     if b is None:
-        sub = a @ a.T
-        d = ne.evaluate("sum(a ** 2, 1)")[np.newaxis].T + ne.evaluate("sum(a ** 2, 1)") - \
-            ne.evaluate("2 * sub")
+        d = np.sum(a ** 2, 1)[np.newaxis].T + np.sum(a ** 2, 1) - 2 * a.dot(
+            a.T)
     else:
-        sub = a @ b.T
-        d = ne.evaluate("sum(a ** 2, 1)")[np.newaxis].T + ne.evaluate("sum(b ** 2, 1)") - \
-            ne.evaluate("2 * sub")
+        d = np.sum(a ** 2, 1)[np.newaxis].T + np.sum(b ** 2, 1) - 2 * a.dot(
+            b.T)
     return np.maximum(d, 0)
 
 class GlvqModel(_LvqBaseModel):
@@ -74,15 +71,14 @@ class GlvqModel(_LvqBaseModel):
     """
 
     def __init__(self, prototypes_per_class=1, initial_prototypes=None,
-                 max_iter=2500, gtol=1e-5, beta=2, C=None,
+                 max_iter=2500, gtol=1e-5, beta=2, c=None,
                  display=False, random_state=None):
         super(GlvqModel, self).__init__(prototypes_per_class=prototypes_per_class,
                                         initial_prototypes=initial_prototypes,
                                         max_iter=max_iter, gtol=gtol, display=display,
                                         random_state=random_state)
         self.beta = beta
-        self.c = C
-        #self.num = 0
+        self.c = c
 
     def phi(self, x):
         """
@@ -98,8 +94,8 @@ class GlvqModel(_LvqBaseModel):
         ----------
         x : input value
         """
-        return self.beta * np.math.exp(self.beta * x) / (
-                1 + np.math.exp(self.beta * x)) ** 2
+        return self.beta * np.math.exp(-self.beta * x) / (
+                1 + np.math.exp(-self.beta * x)) ** 2
 
     def _optgrad(self, variables, training_data, label_equals_prototype,
                  random_state):
@@ -121,7 +117,7 @@ class GlvqModel(_LvqBaseModel):
         distcorrectpluswrong = distcorrect + distwrong
         distcorectminuswrong = distcorrect - distwrong
         mu = distcorectminuswrong / distcorrectpluswrong
-        mu = self.beta * np.exp(self.beta * mu) / (1 + np.exp(self.beta * mu)) ** 2
+        mu = self.beta * np.exp(-self.beta * mu) / (1 + np.exp(-self.beta * mu)) ** 2
         #mu = np.vectorize(self.phi_prime)(mu)
 
         g = np.zeros(prototypes.shape)
@@ -133,13 +129,11 @@ class GlvqModel(_LvqBaseModel):
 
             dcd = mu[idxw] * distcorrect[idxw] * distcorrectpluswrong[idxw]
             dwd = mu[idxc] * distwrong[idxc] * distcorrectpluswrong[idxc]
-            g[i] = dcd.dot(training_data[idxw]) - dwd.dot(training_data[idxc]) \
-                   + (dwd.sum(0) - dcd.sum(0)) * prototypes[i]
-
+            g[i] = dcd.dot(training_data[idxw]) - dwd.dot(
+                training_data[idxc]) + (dwd.sum(0) -
+                                        dcd.sum(0)) * prototypes[i]
         g[:nb_prototypes] = 1 / n_data * g[:nb_prototypes]
-        g = g * (1 + 0.0001 * random_state.rand(*g.shape) - 0.5)
-
-        # display information
+        g = g * (1 + 0.0001 * (random_state.rand(*g.shape) - 0.5))
         return g.ravel()
 
     def _optfun(self, variables, training_data, label_equals_prototype):
@@ -201,7 +195,7 @@ class GlvqModel(_LvqBaseModel):
     def _compute_distance(self, x, w=None):
         if w is None:
             w = self.w_
-        return cdist(x, w, 'euclidean')
+        return cdist(x, w, 'sqeuclidean')
 
     def predict(self, x):
         """Predict class membership index for each input sample.

@@ -26,10 +26,12 @@ def main(hparams):
         grid['lmb'] = [2**i for i in range(-10, 6)]
     if 'kappa' in hparams.params:
         grid['kappa'] = [1, 3, 7, 15]
+    if 'epochs' in hparams.params:
+        grid['epochs'] = [25, 50, 100, 200]
     if 'ppc' in hparams.params:
         grid['ppc'] = [i for i in range(1, 6)]
     if 'beta' in hparams.params:
-        grid['beta'] = [i for i in range(2, 16)]
+        grid['beta'] = [i for i in range(1, 6)]
     if 'sigma' in hparams.params:
         grid['sigma'] = [i for i in np.arange(0.1, 1.2, 0.1)]
     param_grid = ParameterGrid(grid)
@@ -38,7 +40,7 @@ def main(hparams):
 
     param_types = list(set(grid.keys()) | set(elm_opt_param.columns))
 
-    for i in range(len(tt_data)): # across all datasets
+    for i in range(117, len(tt_data)): # across all datasets
         optparams = elm_opt_param.iloc[i].to_dict()
 
         best_score = 0 # stores best accuracy achieved by hyperparameters
@@ -70,10 +72,14 @@ def main(hparams):
 
         accuracy_all.append(best_score)
         best_grid.append(best_param)
+        np.savetxt(os.getcwd() + '/b11_15_acc_117.csv', accuracy_all, delimiter='\t')
+        save_grid = pd.DataFrame(data=best_grid, columns=param_types)
+        save_grid.to_csv(os.getcwd() + '/b11_15_params_117.csv', sep='\t', index=False, header=param_types)
 
-    np.savetxt(os.getcwd() + '/accuracies.csv', accuracy_all, delimiter='\t')
-    best_grid = pd.DataFrame(data=best_grid, columns=param_types)
-    best_grid.to_csv(os.getcwd() + '/grid_search.csv', sep='\t', index=False, header=param_types)
+
+    #np.savetxt(os.getcwd() + '/accuracies.csv', accuracy_all, delimiter='\t')
+    #best_grid = pd.DataFrame(data=best_grid, columns=param_types)
+    #best_grid.to_csv(os.getcwd() + '/grid_search.csv', sep='\t', index=False, header=param_types)
     print(sum(accuracy_all) / len(accuracy_all)) # mean accuracy among all datasets
 
 if __name__ == '__main__':
@@ -84,7 +90,7 @@ if __name__ == '__main__':
     parser.add_argument('--classifier', action='store', required=True)
     parser.add_argument('--optimizer', action='store')
     parser.add_argument('--data_dir', default='/data')
-    parser.add_argument('--param_dir', default='/parameters/f_lms_param.csv')
+    parser.add_argument('--param_dir', default='/parameters/i_elm_opt_param.csv')
     args = parser.parse_args()
     main(args)
 

@@ -30,8 +30,12 @@ def cv_accuracy(test_train, **kwargs):
         elif re.search("^[A-Za-z]+lvq2$", kwargs.get('classifier')):
             for fold in fold_sets:
                 model = LVQClassifier2(fold_sets[fold]["Train"], kwargs.get('classifier')[:-1], kwargs.get('optimizer'),
-                                       int(kwargs.get('ppc')), int(kwargs.get('beta')), kwargs.get('sigma'))
-                sum_acc += model.score(fold_sets[fold]["Test"])
+                                       int(kwargs.get('epochs')), int(kwargs.get('ppc')), int(kwargs.get('beta')),
+                                       kwargs.get('sigma'))
+                if kwargs.get('optimizer') == 'lbfgs':
+                    sum_acc += model.score(fold_sets[fold]["Test"], classifier=kwargs.get('classifier')[:-1], wrapper=True)
+                else:
+                    sum_acc += model.score(fold_sets[fold]["Test"])
         else:
             raise ValueError("Invalid Classifier Type")
     elif kwargs.get('model') == 'c':
@@ -47,9 +51,12 @@ def cv_accuracy(test_train, **kwargs):
         elif re.search("^[A-Za-z]+lvq2$", kwargs.get('classifier')):
             for fold in fold_sets:
                 model = ConvRVFLUsingLVQ2(fold_sets[fold]["Train"], kwargs.get('classifier')[:-1], kwargs.get('optimizer'),
-                                          int(kwargs.get('n')), int(kwargs.get('ppc')), int(kwargs.get('beta')),
-                                          kwargs.get('sigma'))
-                sum_acc += model.score(fold_sets[fold]["Test"])
+                                          int(kwargs.get('epochs')), int(kwargs.get('n')), int(kwargs.get('ppc')),
+                                          int(kwargs.get('beta')), kwargs.get('sigma'))
+                if kwargs.get('optimizer') == 'lbfgs':
+                    sum_acc += model.score(fold_sets[fold]["Test"], classifier=kwargs.get('classifier')[:-1], wrapper=True)
+                else:
+                    sum_acc += model.score(fold_sets[fold]["Test"])
         else:
             raise ValueError("Invalid Classifier Type")
     elif kwargs.get('model') == 'i':
@@ -67,9 +74,12 @@ def cv_accuracy(test_train, **kwargs):
         elif re.search("^[A-Za-z]+lvq2$", kwargs.get('classifier')):
             for fold in fold_sets:
                 model = IntRVFLUsingLVQ2(fold_sets[fold]["Train"], kwargs.get('classifier')[:-1], kwargs.get('optimizer'),
-                                         int(kwargs.get('n')), int(kwargs.get('kappa')), int(kwargs.get('ppc')),
-                                         int(kwargs.get('beta')), kwargs.get('sigma'))
-                sum_acc += model.score(fold_sets[fold]["Test"])
+                                         int(kwargs.get('epochs')), int(kwargs.get('n')), int(kwargs.get('kappa')),
+                                         int(kwargs.get('ppc')), int(kwargs.get('beta')), kwargs.get('sigma'))
+                if kwargs.get('optimizer') == 'lbfgs':
+                    sum_acc += model.score(fold_sets[fold]["Test"], classifier=kwargs.get('classifier')[:-1], wrapper=True)
+                else:
+                    sum_acc += model.score(fold_sets[fold]["Test"])
         else:
             raise ValueError("Invalid Classifier Type")
     else:
@@ -100,8 +110,10 @@ def tt_accuracy(test_train, **kwargs):
             return model.score(test_set)
         elif re.search("^[A-Za-z]+lvq2$", kwargs.get('classifier')):
             model = LVQClassifier2(train_set, kwargs.get('classifier')[:-1], kwargs.get('optimizer'),
-                                   int(kwargs.get('ppc')), int(kwargs.get('beta')), kwargs.get('sigma'))
-            return model.score(test_set)
+                                   int(kwargs.get('epochs')), int(kwargs.get('ppc')), int(kwargs.get('beta')),
+                                   kwargs.get('sigma'))
+            return model.score(test_set, kwargs.get('classifier')[:-1], wrapper=True) \
+                if kwargs.get('optimizer') == 'lbfgs' else model.score(test_set)
         else:
             raise ValueError("Invalid Classifier Type")
     elif kwargs.get('model') == 'c':
@@ -114,9 +126,10 @@ def tt_accuracy(test_train, **kwargs):
             return model.score(test_set)
         elif re.search("^[A-Za-z]+lvq2$", kwargs.get('classifier')):
             model = ConvRVFLUsingLVQ2(train_set, kwargs.get('classifier')[:-1], kwargs.get('optimizer'),
-                                      int(kwargs.get('n')), int(kwargs.get('ppc')), int(kwargs.get('beta')),
-                                      kwargs.get('sigma'))
-            return model.score(test_set)
+                                      int(kwargs.get('epochs')), int(kwargs.get('n')), int(kwargs.get('ppc')),
+                                      int(kwargs.get('beta')), kwargs.get('sigma'))
+            return model.score(test_set, kwargs.get('classifier')[:-1], wrapper=True) \
+                if kwargs.get('optimizer') == 'lbfgs' else model.score(test_set)
         else:
             raise ValueError("Invalid Classifier Type")
     elif kwargs.get('model') == 'i':
@@ -130,9 +143,10 @@ def tt_accuracy(test_train, **kwargs):
             return model.score(test_set)
         elif re.search("^[A-Za-z]+lvq2$", kwargs.get('classifier')):
             model = IntRVFLUsingLVQ2(train_set, kwargs.get('classifier')[:-1], kwargs.get('optimizer'),
-                                     int(kwargs.get('n')), int(kwargs.get('kappa')), int(kwargs.get('ppc')),
-                                     int(kwargs.get('beta')), kwargs.get('sigma'))
-            return model.score(test_set)
+                                     int(kwargs.get('epochs')), int(kwargs.get('n')), int(kwargs.get('kappa')),
+                                     int(kwargs.get('ppc')), int(kwargs.get('beta')), kwargs.get('sigma'))
+            return model.score(test_set, kwargs.get('classifier')[:-1], wrapper=True) \
+                if kwargs.get('optimizer') == 'lbfgs' else model.score(test_set)
         else:
             raise ValueError("Invalid Classifier Type")
     else:
