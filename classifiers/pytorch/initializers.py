@@ -63,7 +63,7 @@ def stratified_mean(x_train, y_train, prototype_distribution):
     for i, l in enumerate(plabels):
         xl = x_train[y_train == l]
         mean_xl = torch.mean(xl, dim=0)
-        protos[i] = mean_xl
+        protos[i] = mean_xl + (torch.rand(pdim) * 2 - 1)
     return protos, plabels
 
 @register_initializer

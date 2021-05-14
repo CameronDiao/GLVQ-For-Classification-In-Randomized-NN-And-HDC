@@ -35,8 +35,8 @@ class IntRVFL:
         self.train_set = train_set
         self.n = n
         self.kappa = kappa
-        self.k = len(train_set.columns) - 1
-        self.w_in = np.random.choice([-1, 1], size=(self.n, self.k))
+        k = len(train_set.columns) - 1
+        self.w_in = np.random.choice([-1, 1], size=(self.n, k))
 
     def preprocess(self, dataset):
         return dataset.drop(["clase"], axis=1).values

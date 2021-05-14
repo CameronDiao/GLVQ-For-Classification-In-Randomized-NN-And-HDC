@@ -15,7 +15,7 @@ def main(hparams):
     simul=5
     #elm_opt_param=sc.loadmat('/Users/camerondiao/Documents/HDResearch/DataManip/i_elm_opt_param.mat') #initial feature set
     #elm_opt_param=(elm_opt_param['i_elm_opt_param'])
-    elm_opt_param=pd.read_csv(os.getcwd() + hparams.param_dir, delimiter='\t')
+    #elm_opt_param=pd.read_csv(os.getcwd() + hparams.param_dir, delimiter='\t')
 
     tt_data = sorted(list(test_train.keys()))
 
@@ -31,17 +31,17 @@ def main(hparams):
     if 'ppc' in hparams.params:
         grid['ppc'] = [i for i in range(1, 6)]
     if 'beta' in hparams.params:
-        grid['beta'] = [i for i in range(1, 6)]
+        grid['beta'] = [i for i in range(1, 16)]
     if 'sigma' in hparams.params:
         grid['sigma'] = [i for i in np.arange(0.1, 1.2, 0.1)]
     param_grid = ParameterGrid(grid)
     best_grid = []
     accuracy_all = []
 
-    param_types = list(set(grid.keys()) | set(elm_opt_param.columns))
+    param_types = list(set(grid.keys())) #| set(elm_opt_param.columns))
 
     for i in range(len(tt_data)): # across all datasets
-        optparams = elm_opt_param.iloc[i].to_dict()
+        optparams = {} #elm_opt_param.iloc[i].to_dict()
 
         best_score = 0 # stores best accuracy achieved by hyperparameters
         best_param = [] # stores optimal hyperparameters of dataset
@@ -60,7 +60,7 @@ def main(hparams):
                 temp[key]["Train"] = test_train.get(key)["Train"]
                 temp[key]["Test"] = test_train.get(key)["Test"]
                 ds_accuracy.append(tt_accuracy(temp, model=hparams.model, classifier=hparams.classifier, optimizer=
-                                               hparams.optimizer, **optparams))
+                                               hparams.optimizer, epochs=2500, **optparams))
 
             accuracy_all_mean = sum(ds_accuracy) / len(ds_accuracy)
             print(accuracy_all_mean)
@@ -89,8 +89,9 @@ if __name__ == '__main__':
     parser.add_argument('--model', action='store', choices=['f', 'c', 'i'], required=True )
     parser.add_argument('--classifier', action='store', required=True)
     parser.add_argument('--optimizer', action='store')
+    parser.add_argument('--epochs', action='store')
     parser.add_argument('--data_dir', default='/data')
-    parser.add_argument('--param_dir', default='/parameters/int_lvq_param.csv')
+    parser.add_argument('--param_dir', default='/parameters/i_elm_opt_param.csv')
     args = parser.parse_args()
     main(args)
 

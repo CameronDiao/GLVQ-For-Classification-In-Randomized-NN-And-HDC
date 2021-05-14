@@ -26,9 +26,9 @@ class IntRVFLUsingLVQ2(IntRVFL):
     def train(self):
         train_features = self.preprocess(self.train_set)
         enc_matrix = self.encodings(train_features)
-        act_matrix = self.activations(enc_matrix)
+        self.act_matrix = self.activations(enc_matrix)
         train_labels = self.train_set["clase"].values
-        w = self.readout(act_matrix, train_labels)
+        w = self.readout(self.act_matrix, train_labels)
         return w
 
     def score(self, test_set, classifier=None, wrapper=None):
@@ -38,19 +38,16 @@ class IntRVFLUsingLVQ2(IntRVFL):
         act_matrix = self.activations(enc_matrix)
         test_labels = test_set["clase"].values
         if wrapper:
-            if act_matrix.shape[1] != w.shape[1]:
-                raise ValueError("X has wrong number of features\n"
-                                 "found=%d\n"
-                                 "expected=%d" % (w.shape[1], act_matrix.shape[1]))
             if classifier == 'glvq':
                 dist = cdist(act_matrix, w, 'sqeuclidean')
             elif classifier == 'kglvq':
                 dist = kernel_distance(torch.from_numpy(rbf_kernel(act_matrix, gamma=self.sigma)),
-                                       torch.from_numpy(rbf_kernel(act_matrix, self.train_set, gamma=self.sigma)),
-                                       torch.from_numpy(rbf_kernel(self.train_set, gamma=self.sigma)), act_matrix, w)
+                                       torch.from_numpy(rbf_kernel(act_matrix, self.act_matrix, gamma=self.sigma)),
+                                       torch.from_numpy(rbf_kernel(self.act_matrix, gamma=self.sigma)),
+                                       torch.from_numpy(act_matrix), torch.from_numpy(w)).numpy()
             else:
                 raise ValueError("Invalid classifier")
-            test_acc = np.sum(test_labels == np.floor(dist.argmin(1) / self.ppc))
+            test_acc = np.sum(test_labels == np.floor_divide(dist.argmin(1), self.ppc))
             return test_acc / len(test_labels)
 
         act_matrix = torch.from_numpy(act_matrix)

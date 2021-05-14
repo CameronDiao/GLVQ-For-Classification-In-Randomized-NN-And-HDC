@@ -1,7 +1,4 @@
 import torch
-from scipy import optimize
-import torch.nn.functional as F
-import math
 import numpy as np
 from functools import reduce
 from collections import OrderedDict

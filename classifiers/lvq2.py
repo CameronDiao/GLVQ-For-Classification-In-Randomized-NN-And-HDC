@@ -1,5 +1,6 @@
 import numpy as np
 import os
+import itertools
 from scipy.optimize import minimize
 from sklearn.metrics.pairwise import rbf_kernel
 
@@ -25,13 +26,13 @@ def lvq2(inputs, labels, classifier, optimizer, epochs, ppc, beta, sigma=None):
         raise ValueError("Invalid LVQ Classifier Type")
 
     if optimizer == "lbfgs":
-        model = scipy_train(inputs, labels, model, criterion, ppc=ppc, iterations=2500)
+        model = scipy_train(inputs, labels, model, criterion, ppc=ppc, iterations=epochs)
     elif optimizer == "sgd":
-        optimizer = torch.optim.SGD(model.parameters(), lr = 0.01, momentum=0.9, weight_decay=1e-4)
+        optimizer = torch.optim.SGD(model.parameters(), lr=0.01, momentum=0.9, weight_decay=1e-4)
         batch_train(inputs, labels, model, optimizer, criterion, epochs)
         model.load_state_dict(torch.load(os.getcwd() + "/checkpoint.pt"))
     elif optimizer == "adam":
-        optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
+        optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
         batch_train(inputs, labels, model, optimizer, criterion, epochs)
         model.load_state_dict(torch.load(os.getcwd() + "/checkpoint.pt"))
     else:
@@ -101,7 +102,7 @@ def batch_train(x_data, y_data, model, optimizer, criterion, epochs, scheduler=N
         device = torch.device("cpu")
     model.to(device)
 
-    trainloader = torch.utils.data.DataLoader(TensorDataset(x_data, y_data), batch_size=16, num_workers=0,
+    trainloader = torch.utils.data.DataLoader(TensorDataset(x_data, y_data), batch_size=32, num_workers=0,
                                               shuffle=True)
 
     for epoch in range(epochs):
@@ -120,9 +121,13 @@ def batch_train(x_data, y_data, model, optimizer, criterion, epochs, scheduler=N
 
 def scipy_train(x_data, y_data, model, loss, ppc, iterations=2500):
     nb_classes = torch.unique(y_data).size()[0]
-    nb_features = x_data.shape[1]
+    nb_features = x_data.shape[0]
     obj = PyTorchObjective(model, loss, x_data, y_data)
+    bounds = []
+    for i in range(ppc * nb_classes):
+        cls = int(i / ppc)
+        bounds.append([(None, None) if i == cls else (0, 0) for i in y_data])
+    bounds = list(itertools.chain(*bounds))
     res = minimize(fun=obj.fun, jac=obj.jac, method='l-bfgs-b', x0=obj.x0,
-                   options={'gtol': 1e-5, 'maxiter': iterations})
+                   bounds=bounds, options={'gtol': 1e-5, 'maxiter': iterations})
     return res.x.reshape((ppc * nb_classes, nb_features))
-

@@ -2,15 +2,16 @@ from models.BaseClassifier.base import BaseClassifier
 from classifiers import lvq1
 
 class LVQClassifier1(BaseClassifier):
-    def __init__(self, train_set, classifier, ppc, beta=None, sigma=None):
+    def __init__(self, train_set, classifier, epochs, ppc, beta=None, sigma=None):
         super().__init__(train_set)
         self.classifier = classifier
         self.ppc = ppc
         self.beta = beta
         self.sigma = sigma
+        self.epochs = epochs
 
     def model(self, inputs, labels):
-        return lvq1(inputs, labels, self.classifier, ppc=self.ppc, beta=self.beta, sigma=self.sigma)
+        return lvq1(inputs, labels, self.classifier, epochs=self.epochs, ppc=self.ppc, beta=self.beta, sigma=self.sigma)
 
     def train(self):
         train_features = self.preprocess(self.train_set)

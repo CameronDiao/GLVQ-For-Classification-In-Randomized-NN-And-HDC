@@ -36,7 +36,7 @@ def main(hparams):
                 temp[key]["Test"] = test_train.get(key)["Test"]
 
                 accuracy_all[i].append(tt_accuracy(temp, model=hparams.model, classifier=hparams.classifier, optimizer=
-                                                   hparams.optimizer, **optparams))
+                                                   hparams.optimizer, epochs=hparams.epochs, **optparams))
             else:  # if dataset is in kf_data
                 temp = {}
                 temp[key] = {}
@@ -58,29 +58,31 @@ def main(hparams):
                 temp[key][key2]["Test"] = k_fold.get(key)[key2]["Test"]
 
                 accuracy_all[i].append(cv_accuracy(temp, model=hparams.model, classifier=hparams.classifier, optimizer=
-                                                   hparams.optimizer, **optparams))
+                                                   hparams.optimizer, epochs=hparams.epochs, **optparams))
             print(accuracy_all[i][-1])
+
     accuracy_all_s = [sum(elm) / simul for elm in accuracy_all]  # mean values for each dataset accross simulations
     np.savetxt(os.getcwd() + '/accuracies.csv', accuracy_all_s, delimiter='\t')
-    #
+
     accuracy_all_mean = sum(accuracy_all_s) / len(accuracy_all_s)  # mean accuracy among all datasets
     print(accuracy_all_mean)
-    #
-    # f = open("output.txt", "w")
-    # f.write("Datasets Accuracies:\n")
-    # for i in range(len(accuracy_all)):
-    #     f.write(total_data[i] + " " + str(accuracy_all[i]) + "\n")
-    #
-    # f.write("\n")
-    # f.write("Average Test/Train Model Accuracy:\n")
-    # f.write(str(accuracy_all_mean))
-    # f.close()
+
+    f = open("output.txt", "w")
+    f.write("Datasets Accuracies:\n")
+    for i in range(len(accuracy_all)):
+        f.write(total_data[i] + " " + str(accuracy_all[i]) + "\n")
+
+    f.write("\n")
+    f.write("Average Test/Train Model Accuracy:\n")
+    f.write(str(accuracy_all_mean))
+    f.close()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='GLVQ-RVFL')
     parser.add_argument('--model', action='store', choices=['f', 'c', 'i'], required=True )
     parser.add_argument('--classifier', action='store', required=True)
     parser.add_argument('--optimizer', action='store', choices=['lbfgs', 'sgd', 'adam'])
+    parser.add_argument('--epochs', action='store')
     parser.add_argument('--data_dir', default='/data')
     parser.add_argument('--param_dir', default='/parameters/int_lvq_param.csv')
     args = parser.parse_args()

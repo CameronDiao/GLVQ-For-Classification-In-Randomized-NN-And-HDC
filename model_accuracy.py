@@ -24,8 +24,8 @@ def cv_accuracy(test_train, **kwargs):
                 sum_acc += model.score(fold_sets[fold]["Test"])
         elif re.search("^[A-Za-z]+lvq1$", kwargs.get('classifier')):
             for fold in fold_sets:
-                model = LVQClassifier1(fold_sets[fold]["Train"], kwargs.get('classifier')[:-1], int(kwargs.get('ppc')),
-                                       int(kwargs.get('beta')), kwargs.get('sigma'))
+                model = LVQClassifier1(fold_sets[fold]["Train"], kwargs.get('classifier')[:-1], int(kwargs.get('epochs')),
+                                       int(kwargs.get('ppc')), int(kwargs.get('beta')), kwargs.get('sigma'))
                 sum_acc += model.score(fold_sets[fold]["Test"])
         elif re.search("^[A-Za-z]+lvq2$", kwargs.get('classifier')):
             for fold in fold_sets:
@@ -45,8 +45,9 @@ def cv_accuracy(test_train, **kwargs):
                 sum_acc += model.score(fold_sets[fold]["Test"])
         elif re.search("^[A-Za-z]+lvq1$", kwargs.get('classifier')):
             for fold in fold_sets:
-                model = ConvRVFLUsingLVQ1(fold_sets[fold]["Train"], kwargs.get('classifier')[:-1], int(kwargs.get('n')),
-                                          int(kwargs.get('ppc')), int(kwargs.get('beta')), kwargs.get('sigma'))
+                model = ConvRVFLUsingLVQ1(fold_sets[fold]["Train"], kwargs.get('classifier')[:-1], int(kwargs.get('epochs')),
+                                          int(kwargs.get('n')), int(kwargs.get('ppc')), int(kwargs.get('beta')),
+                                          kwargs.get('sigma'))
                 sum_acc += model.score(fold_sets[fold]["Test"])
         elif re.search("^[A-Za-z]+lvq2$", kwargs.get('classifier')):
             for fold in fold_sets:
@@ -67,9 +68,9 @@ def cv_accuracy(test_train, **kwargs):
                 sum_acc += model.score(fold_sets[fold]["Test"])
         elif re.search("^[A-Za-z]+lvq1$", kwargs.get('classifier')):
             for fold in fold_sets:
-                model = IntRVFLUsingLVQ1(fold_sets[fold]["Train"], kwargs.get('classifier')[:-1], int(kwargs.get('n')),
-                                         int(kwargs.get('kappa')), int(kwargs.get('ppc')), int(kwargs.get('beta')),
-                                         kwargs.get('sigma'))
+                model = IntRVFLUsingLVQ1(fold_sets[fold]["Train"], kwargs.get('classifier')[:-1], int(kwargs.get('epochs')),
+                                         int(kwargs.get('n')), int(kwargs.get('kappa')), int(kwargs.get('ppc')),
+                                         int(kwargs.get('beta')), kwargs.get('sigma'))
                 sum_acc += model.score(fold_sets[fold]["Test"])
         elif re.search("^[A-Za-z]+lvq2$", kwargs.get('classifier')):
             for fold in fold_sets:
@@ -105,8 +106,8 @@ def tt_accuracy(test_train, **kwargs):
             model = RLMSClassifier(train_set, kwargs.get('lmb'))
             return model.score(test_set)
         elif re.search("^[A-Za-z]+lvq1$", kwargs.get('classifier')):
-            model = LVQClassifier1(train_set, kwargs.get('classifier')[:-1], int(kwargs.get('ppc')),
-                                   int(kwargs.get('beta')), kwargs.get('sigma'))
+            model = LVQClassifier1(train_set, kwargs.get('classifier')[:-1], int(kwargs.get('epochs')),
+                                   int(kwargs.get('ppc')), int(kwargs.get('beta')), kwargs.get('sigma'))
             return model.score(test_set)
         elif re.search("^[A-Za-z]+lvq2$", kwargs.get('classifier')):
             model = LVQClassifier2(train_set, kwargs.get('classifier')[:-1], kwargs.get('optimizer'),
@@ -121,8 +122,9 @@ def tt_accuracy(test_train, **kwargs):
             model = ConvRVFLUsingRLMS(train_set, kwargs.get('n'), kwargs.get('lmb'))
             return model.score(test_set)
         elif re.search("^[A-Za-z]+lvq1$", kwargs.get('classifier')):
-            model = ConvRVFLUsingLVQ1(train_set, kwargs.get('classifier')[:-1], int(kwargs.get('n')),
-                                      int(kwargs.get('ppc')), int(kwargs.get('beta')), kwargs.get('sigma'))
+            model = ConvRVFLUsingLVQ1(train_set, kwargs.get('classifier')[:-1], int(kwargs.get('epochs')),
+                                      int(kwargs.get('n')), int(kwargs.get('ppc')), int(kwargs.get('beta')),
+                                      kwargs.get('sigma'))
             return model.score(test_set)
         elif re.search("^[A-Za-z]+lvq2$", kwargs.get('classifier')):
             model = ConvRVFLUsingLVQ2(train_set, kwargs.get('classifier')[:-1], kwargs.get('optimizer'),
@@ -137,9 +139,9 @@ def tt_accuracy(test_train, **kwargs):
             model = IntRVFLUsingRLMS(train_set, int(kwargs.get('n')), int(kwargs.get('kappa')), kwargs.get('lmb'))
             return model.score(test_set)
         elif re.search("^[A-Za-z]+lvq1$", kwargs.get('classifier')):
-            model = IntRVFLUsingLVQ1(train_set, kwargs.get('classifier')[:-1], int(kwargs.get('n')),
-                                     int(kwargs.get('kappa')), int(kwargs.get('ppc')), int(kwargs.get('beta')),
-                                     kwargs.get('sigma'))
+            model = IntRVFLUsingLVQ1(train_set, kwargs.get('classifier')[:-1], int(kwargs.get('epochs')),
+                                     int(kwargs.get('n')), int(kwargs.get('kappa')), int(kwargs.get('ppc')),
+                                     int(kwargs.get('beta')), kwargs.get('sigma'))
             return model.score(test_set)
         elif re.search("^[A-Za-z]+lvq2$", kwargs.get('classifier')):
             model = IntRVFLUsingLVQ2(train_set, kwargs.get('classifier')[:-1], kwargs.get('optimizer'),

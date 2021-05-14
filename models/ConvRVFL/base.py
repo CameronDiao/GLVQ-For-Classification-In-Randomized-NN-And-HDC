@@ -4,8 +4,8 @@ class ConvRVFL:
     def __init__(self, train_set, n):
         self.train_set = train_set
         self.n = n
-        self.k = len(self.train_set.columns) - 1
-        self.w_in = np.random.uniform(-1, 1, size=(self.n, self.k))
+        k = len(self.train_set.columns) - 1
+        self.w_in = np.random.uniform(-1, 1, size=(self.n, k))
         self.b = np.random.uniform(-0.1, 0.1, size=self.n)
 
     def preprocess(self, dataset):

@@ -16,7 +16,7 @@ class LVQClassifier2(BaseClassifier):
         self.optimizer = optimizer
         self.ppc = ppc
         self.beta = beta
-        self.sigma = sigma
+        self.sigma = round(sigma, 1)
         self.epochs = epochs
 
     def model(self, inputs, labels):
@@ -24,9 +24,9 @@ class LVQClassifier2(BaseClassifier):
                     ppc=self.ppc, beta=self.beta, sigma=self.sigma)
 
     def train(self):
-        train_features = self.preprocess(self.train_set)
+        self.train_features = self.preprocess(self.train_set)
         train_labels = self.train_set["clase"].values
-        w = self.model(train_features, train_labels)
+        w = self.model(self.train_features, train_labels)
         return w
 
     def score(self, test_set, classifier=None, wrapper=None):
@@ -34,19 +34,16 @@ class LVQClassifier2(BaseClassifier):
         test_features = self.preprocess(test_set)
         test_labels = test_set["clase"].values
         if wrapper:
-            if test_features.shape[1] != w.shape[1]:
-                raise ValueError("X has wrong number of features\n"
-                                 "found=%d\n"
-                                 "expected=%d" % (w.shape[1], test_features.shape[1]))
             if classifier == 'glvq':
                 dist = cdist(test_features, w, 'sqeuclidean')
             elif classifier == 'kglvq':
                 dist = kernel_distance(torch.from_numpy(rbf_kernel(test_features, gamma=self.sigma)),
-                                       torch.from_numpy(rbf_kernel(test_features, self.train_set, gamma=self.sigma)),
-                                       torch.from_numpy(rbf_kernel(self.train_set, gamma=self.sigma)), test_features, w)
+                                       torch.from_numpy(rbf_kernel(test_features, self.train_features, gamma=self.sigma)),
+                                       torch.from_numpy(rbf_kernel(self.train_features, gamma=self.sigma)),
+                                       torch.from_numpy(test_features), torch.from_numpy(w)).numpy()
             else:
                 raise ValueError("Invalid classifier")
-            test_acc = np.sum(test_labels == np.floor(dist.argmin(1) / self.ppc))
+            test_acc = np.sum(test_labels == np.floor_divide(dist.argmin(1), self.ppc))
             return test_acc / len(test_labels)
         test_features = torch.from_numpy(test_features)
         test_labels = torch.from_numpy(test_labels)
