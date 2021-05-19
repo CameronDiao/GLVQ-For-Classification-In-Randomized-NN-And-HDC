@@ -1,4 +1,4 @@
-from models.ConvRVFL.base import ConvRVFL
+from .base import ConvRVFL
 from classifiers import lvq1
 
 class ConvRVFLUsingLVQ1(ConvRVFL):

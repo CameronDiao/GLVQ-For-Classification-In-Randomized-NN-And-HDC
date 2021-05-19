@@ -6,7 +6,7 @@ from scipy.spatial.distance import cdist
 from sklearn.metrics.pairwise import rbf_kernel
 from classifiers.pytorch import kernel_distance
 
-from models.BaseClassifier.base import BaseClassifier
+from .base import BaseClassifier
 from classifiers import lvq2
 
 class LVQClassifier2(BaseClassifier):

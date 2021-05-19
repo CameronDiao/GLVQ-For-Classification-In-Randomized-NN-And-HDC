@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from models.ConvRVFL.base import ConvRVFL
+from .base import ConvRVFL
 from classifiers import rlms
 
 class ConvRVFLUsingRLMS(ConvRVFL):

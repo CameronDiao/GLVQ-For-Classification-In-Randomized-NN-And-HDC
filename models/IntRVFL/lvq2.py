@@ -6,7 +6,7 @@ from scipy.spatial.distance import cdist
 from sklearn.metrics.pairwise import rbf_kernel
 from classifiers.pytorch import kernel_distance
 
-from models.IntRVFL.base import IntRVFL
+from .base import IntRVFL
 from classifiers import lvq2
 
 class IntRVFLUsingLVQ2(IntRVFL):

@@ -6,11 +6,10 @@ from sklearn.metrics.pairwise import rbf_kernel
 
 import torch
 from torch.utils.data import TensorDataset
-from classifiers.pytorch import squared_euclidean_distance, kernel_distance
-from classifiers.pytorch import GLVQLoss, KGLVQLoss
-from classifiers.pytorch import Prototypes1D
-
-from classifiers.pytorch import PyTorchObjective
+from .pytorch import squared_euclidean_distance, kernel_distance
+from .pytorch import GLVQLoss, KGLVQLoss
+from .pytorch import Prototypes1D
+from .pytorch import PyTorchObjective
 
 def lvq2(inputs, labels, classifier, optimizer, epochs, ppc, beta, sigma=None):
     inputs = torch.from_numpy(inputs)

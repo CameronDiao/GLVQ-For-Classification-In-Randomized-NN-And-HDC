@@ -1,5 +1,5 @@
-from preprocess.read import read_text, read_cv, read_tt
-from preprocess.process import normalize
+from .read import read_text, read_cv, read_tt
+from .process import normalize
 import pandas as pd
 import os
 import re

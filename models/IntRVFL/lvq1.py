@@ -1,4 +1,4 @@
-from models.IntRVFL.base import IntRVFL
+from .base import IntRVFL
 from classifiers import lvq1
 
 class IntRVFLUsingLVQ1(IntRVFL):

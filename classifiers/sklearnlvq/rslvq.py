@@ -11,9 +11,8 @@ import numpy as np
 from numba import njit, vectorize
 from scipy.optimize import minimize
 from sklearn.utils import validation
-from sklearn.utils.multiclass import unique_labels
 from sklearn.utils.validation import check_is_fitted
-from sklearn_lvq.lvq import _LvqBaseModel
+from .lvq import _LvqBaseModel
 
 
 @vectorize
@@ -98,7 +97,7 @@ class RslvqModel(_LvqBaseModel):
             for j in range(prototypes.shape[0]):
                 d = (xi - prototypes[j])
                 if c_w_[j] == c_xi:
-                    g[j] += (1 / sigma) * (_phelper(j, xi, w_, c_w_, sigma, prototypes=prototypes, y=c_xi) - \
+                    g[j] += (1 / sigma) * (_phelper(j, xi, w_, c_w_, sigma, prototypes=prototypes, y=c_xi) -
                                            _phelper(j, xi, w_, c_w_, sigma, prototypes=prototypes)) * d
                 else:
                     g[j] -= (1 / sigma) * _phelper(j, xi, w_, c_w_, sigma, prototypes=prototypes) * d

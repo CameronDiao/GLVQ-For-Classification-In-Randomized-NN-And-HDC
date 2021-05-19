@@ -1,4 +1,4 @@
-from models.BaseClassifier.base import BaseClassifier
+from .base import BaseClassifier
 from classifiers import lvq1
 
 class LVQClassifier1(BaseClassifier):

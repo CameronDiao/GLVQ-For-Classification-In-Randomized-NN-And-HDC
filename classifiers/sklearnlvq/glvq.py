@@ -15,7 +15,7 @@ from sklearn.utils.multiclass import unique_labels
 from sklearn.utils.validation import check_is_fitted
 from itertools import product
 
-from sklearn_lvq.lvq import _LvqBaseModel
+from .lvq import _LvqBaseModel
 
 def _squared_euclidean(a, b=None):
     if b is None:

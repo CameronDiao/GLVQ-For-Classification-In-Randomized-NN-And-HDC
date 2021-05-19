@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from models.IntRVFL.base import IntRVFL
+from .base import IntRVFL
 from classifiers import rlms
 
 class IntRVFLUsingRLMS(IntRVFL):

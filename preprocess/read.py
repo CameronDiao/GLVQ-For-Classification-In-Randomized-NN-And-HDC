@@ -1,7 +1,4 @@
-
 import pandas as pd
-import os
-import re
 
 def read_text(file_path):
     """

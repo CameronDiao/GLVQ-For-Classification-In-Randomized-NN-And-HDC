@@ -69,7 +69,7 @@ def lomega_distance(x, y, omegas):
     Expected dimension of omegas is 3.
     """
     projected_x = x @ omegas
-    projected_y = torch.diagonal(y @ omegas).T
+    projected_y = torch.t(torch.diagonal(y @ omegas))
     expanded_y = torch.unsqueeze(projected_y, dim=1)
     batchwise_difference = expanded_y - projected_x
     differences_squared = batchwise_difference**2

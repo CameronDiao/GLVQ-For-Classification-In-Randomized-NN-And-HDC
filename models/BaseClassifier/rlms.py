@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from models.BaseClassifier.base import BaseClassifier
+from .base import BaseClassifier
 from classifiers import rlms
 
 class RLMSClassifier(BaseClassifier):
