@@ -103,6 +103,9 @@ instance/
 # Scrapy stuff:
 .scrapy
 
+# R stuff:
+.Rhistory
+
 # Sphinx documentation
 docs/_build/
 

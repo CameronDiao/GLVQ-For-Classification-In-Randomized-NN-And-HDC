@@ -1,6 +1,5 @@
 from .sklearnlvq import GlvqModel
 from .sklearnlvq import RslvqModel
-#import sklearn_lvq
 
 def lvq1(inputs, labels, classifier, epochs, ppc, beta=None, sigma=None):
     if classifier == "glvq":
