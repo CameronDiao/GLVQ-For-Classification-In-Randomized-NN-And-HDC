@@ -27,7 +27,7 @@ def lvq2(inputs, labels, classifier, optimizer, epochs, ppc, beta, sigma=None):
     if optimizer == "lbfgs":
         model = scipy_train(inputs, labels, model, criterion, ppc=ppc, iterations=epochs)
     elif optimizer == "sgd":
-        optimizer = torch.optim.SGD(model.parameters(), lr=0.01, momentum=0.9, weight_decay=1e-4)
+        optimizer = torch.optim.SGD(model.parameters(), lr=1e-3, momentum=0.9, weight_decay=1e-4)
         batch_train(inputs, labels, model, optimizer, criterion, epochs)
         model.load_state_dict(torch.load(os.getcwd() + "/checkpoint.pt"))
     elif optimizer == "adam":

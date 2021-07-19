@@ -84,6 +84,6 @@ if __name__ == '__main__':
     parser.add_argument('--optimizer', action='store', choices=['lbfgs', 'sgd', 'adam'])
     parser.add_argument('--epochs', action='store')
     parser.add_argument('--data_dir', default='/data')
-    parser.add_argument('--param_dir', default='/parameters/f_lms_param.csv')
+    parser.add_argument('--param_dir', default='/parameters/int_lvq_param.csv')
     args = parser.parse_args()
     main(args)

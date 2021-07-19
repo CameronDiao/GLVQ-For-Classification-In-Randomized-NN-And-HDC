@@ -10,7 +10,6 @@ matplotlib==3.2.1
 mkl-fft==1.0.15
 mkl-service==2.3.0
 mpmath==1.1.0
-mystic==0.3.6
 numba==0.50.0
 numexpr==2.7.1
 numpy==1.18.5
@@ -24,7 +23,5 @@ pytz==2020.1
 scikit-learn==0.22.1
 scipy==1.5.0
 six==1.14.0
-sklearn-lvq==1.1.0
 sympy==1.6.1
 torch==1.6.0
-torchvision==0.7.0
