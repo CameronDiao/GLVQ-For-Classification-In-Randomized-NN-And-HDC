@@ -1,5 +1,23 @@
 ## Runtime Parameters For Evaluating RVFL Networks
 
+### Params
+
+Only to be passed to ```tuning.py``` at runtime.
+
+The ```params``` parameter determines what network hyperparameters are being tuned (by grid search).
+
+If you only specify a subset of the network hyperparameters, ```tuning.py``` will fetch the rest from ```param_dir``` when training the network.
+
+| Values |       Meaning       | Tuning Range |
+| :------: | :----------------: | :------: |
+|  n  | number of hidden layer nodes | [50-1500] (Step Size 50) |
+|  lmb  | RLS regularization parameter | 2<sup>[-10, 5]</sup> (Step Size 1) |
+|  kappa  | threshold parameter of the intRVFL clipping function | {1, 3, 7, 15} |
+|  epochs  | number of training epochs | {25, 50, 100, 200} |
+|  ppc  | number of prototypes per class | [1, 5] (Step Size 1) |
+|  beta  | slope parameter of the sigmoid function | [1, 15] (Step Size 1) |
+|  sigma  | kernel parameter of KGLVQ | [0.1, 1.1] (Step Size 0.1) |
+
 ### Model
 
 The ```model``` parameter determines what features are passed to the network classifier.
@@ -28,7 +46,7 @@ For example, you can pass ```glvq1``` to ```classifier``` but not ```glvq```.
 |  rlms  | Regularized Least Mean Squares | Supported by ```scipy``` and ```torch``` |
 |  glvq  | [Generalized Learning Vector Quantization](https://papers.nips.cc/paper/1995/file/9c3b1830513cc3b8fc4b76635d32e692-Paper.pdf) | Supported by ```scipy``` and ```torch``` |
 |  rslvq  | [Robust Soft Learning Vector Quantization](https://dl.acm.org/doi/10.1162/089976603321891819) | Supported by ```scipy``` |
-|  kglvq  | kernalized GLVQ | Supported by ```scipy``` (```torch``` unstable) |
+|  kglvq  | [kernalized GLVQ](https://ieeexplore.ieee.org/document/1333849) | Supported by ```scipy``` (```torch``` unstable) |
 
 ### Optimizer
 

@@ -62,8 +62,6 @@ def main(hparams):
             print(accuracy_all[i][-1])
 
     accuracy_all_s = [sum(elm) / simul for elm in accuracy_all]  # mean values for each dataset accross simulations
-    np.savetxt(os.getcwd() + '/accuracies.csv', accuracy_all_s, delimiter='\t')
-
     accuracy_all_mean = sum(accuracy_all_s) / len(accuracy_all_s)  # mean accuracy among all datasets
     print(accuracy_all_mean)
 

@@ -31,7 +31,7 @@ Without limiting the number of training iterations, we found that the average ac
 
 ## License
 
-This project is released under the [GNU GPLv3](LICENSE) license.
+This project is released under the [GNU/GPLv3](LICENSE) license.
 
 ## Installation
 
@@ -86,4 +86,29 @@ python main.py --model <model> --classifier <classifier> --optimizer <optimizer>
 ```
 
 Specify parameters ```<model>```, ```<classifier>```, ```<optimizer>```, ```<epochs>```, and ```<param_dir>``` according to the tables provided in [runtime_params.md](runtime_params.md).
+
+By default, ```main.py``` will run the network 5 times on the UCI datasets before outputting results.
+Results will be saved in the file ```output.txt``` of the current working directory.
+
+You can find results from our paper in the ```results``` folder of this repository. We used **R** to generate our result tables and perform significance tests.
+
+## Hyperparameter Tuning
+
+We found optimal hyperparameters for each network using grid search (procedure implemented in [tuning.py](tuning.py)).
+You can replicate our tuning procedure with the command:
+
+```
+python tuning.py --params <params> --model <model> --classifier <classifier> --optimizer <optimizer> --epochs <epochs> --param_dir <param_dir>
+```
+
+Specify parameters ```<params>```, ```<model>```, ```<classifier>```, ```<optimizer>```, ```<epochs>```, and ```<param_dir>``` according to the tables provided in [runtime_params.md](runtime_params.md).
+
+The optimal hyperparameters will be saved to the file ```params.csv``` of the current working directory.
+
+## Acknowledgements
+
+This work was only made possible by the following amazing repositories:
+
+* [sklearn-lvq](https://github.com/MrNuggelz/sklearn-lvq)
+* [prototorch](https://github.com/si-cim/prototorch)
 

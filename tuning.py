@@ -9,6 +9,9 @@ from model_accuracy import tt_accuracy
 from preprocess import scan_folder_gs
 
 def main(hparams):
+    if ('epchs' in hparams.params and hparams.epochs is not None):
+        raise ValueError("Cannot pass epochs as runtime parameter and tuning parameter")
+
     test_train = {}
     scan_folder_gs(os.getcwd() + hparams.data_dir, "data", test_train)
 

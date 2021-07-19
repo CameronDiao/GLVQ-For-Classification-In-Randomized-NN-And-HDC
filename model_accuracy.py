@@ -27,7 +27,7 @@ def cv_accuracy(test_train, **kwargs):
         elif re.search("^[A-Za-z]+lvq1$", kwargs.get('classifier')):
             for fold in fold_sets:
                 model = LVQClassifier1(fold_sets[fold]["Train"], kwargs.get('classifier')[:-1],
-                                       int(kwargs.get('epochs')) if kwargs.get('epochs') != None else default_epochs,
+                                       int(kwargs.get('epochs')) if kwargs.get('epochs') is not None else default_epochs,
                                        int(kwargs.get('ppc')), int(kwargs.get('beta')), kwargs.get('sigma'))
                 sum_acc += model.score(fold_sets[fold]["Test"])
         elif re.search("^[A-Za-z]+lvq2$", kwargs.get('classifier')):
@@ -49,7 +49,7 @@ def cv_accuracy(test_train, **kwargs):
         elif re.search("^[A-Za-z]+lvq1$", kwargs.get('classifier')):
             for fold in fold_sets:
                 model = ConvRVFLUsingLVQ1(fold_sets[fold]["Train"], kwargs.get('classifier')[:-1],
-                                          int(kwargs.get('epochs')) if kwargs.get('epochs') != None else default_epochs,
+                                          int(kwargs.get('epochs')) if kwargs.get('epochs') is not None else default_epochs,
                                           int(kwargs.get('n')), int(kwargs.get('ppc')), int(kwargs.get('beta')),
                                           kwargs.get('sigma'))
                 sum_acc += model.score(fold_sets[fold]["Test"])
@@ -73,7 +73,7 @@ def cv_accuracy(test_train, **kwargs):
         elif re.search("^[A-Za-z]+lvq1$", kwargs.get('classifier')):
             for fold in fold_sets:
                 model = IntRVFLUsingLVQ1(fold_sets[fold]["Train"], kwargs.get('classifier')[:-1],
-                                         int(kwargs.get('epochs')) if kwargs.get('epochs') != None else default_epochs,
+                                         int(kwargs.get('epochs')) if kwargs.get('epochs') is not None else default_epochs,
                                          int(kwargs.get('n')), int(kwargs.get('kappa')), int(kwargs.get('ppc')),
                                          int(kwargs.get('beta')), kwargs.get('sigma'))
                 sum_acc += model.score(fold_sets[fold]["Test"])
@@ -112,7 +112,7 @@ def tt_accuracy(test_train, **kwargs):
             return model.score(test_set)
         elif re.search("^[A-Za-z]+lvq1$", kwargs.get('classifier')):
             model = LVQClassifier1(train_set, kwargs.get('classifier')[:-1],
-                                   int(kwargs.get('epochs')) if kwargs.get('epochs') != None else default_epochs,
+                                   int(kwargs.get('epochs')) if kwargs.get('epochs') is not None else default_epochs,
                                    int(kwargs.get('ppc')), int(kwargs.get('beta')), kwargs.get('sigma'))
             return model.score(test_set)
         elif re.search("^[A-Za-z]+lvq2$", kwargs.get('classifier')):
@@ -129,7 +129,7 @@ def tt_accuracy(test_train, **kwargs):
             return model.score(test_set)
         elif re.search("^[A-Za-z]+lvq1$", kwargs.get('classifier')):
             model = ConvRVFLUsingLVQ1(train_set, kwargs.get('classifier')[:-1],
-                                      int(kwargs.get('epochs')) if kwargs.get('epochs') != None else default_epochs,
+                                      int(kwargs.get('epochs')) if kwargs.get('epochs') is not None else default_epochs,
                                       int(kwargs.get('n')), int(kwargs.get('ppc')), int(kwargs.get('beta')),
                                       kwargs.get('sigma'))
             return model.score(test_set)
@@ -147,7 +147,7 @@ def tt_accuracy(test_train, **kwargs):
             return model.score(test_set)
         elif re.search("^[A-Za-z]+lvq1$", kwargs.get('classifier')):
             model = IntRVFLUsingLVQ1(train_set, kwargs.get('classifier')[:-1],
-                                     int(kwargs.get('epochs')) if kwargs.get('epochs') != None else default_epochs,
+                                     int(kwargs.get('epochs')) if kwargs.get('epochs') is not None else default_epochs,
                                      int(kwargs.get('n')), int(kwargs.get('kappa')), int(kwargs.get('ppc')),
                                      int(kwargs.get('beta')), kwargs.get('sigma'))
             return model.score(test_set)
