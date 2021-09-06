@@ -4,7 +4,6 @@ Cython==0.29.20
 dill==0.3.2
 joblib==0.15.1
 kiwisolver==1.2.0
-klepto==0.1.9
 llvmlite==0.33.0
 matplotlib==3.2.1
 mkl-fft==1.0.15
