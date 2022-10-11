@@ -2,7 +2,7 @@ certifi==2020.6.20
 cycler==0.10.0
 Cython==0.29.20
 dill==0.3.2
-joblib==0.15.1
+joblib==1.2.0
 kiwisolver==1.2.0
 llvmlite==0.33.0
 matplotlib==3.2.1
